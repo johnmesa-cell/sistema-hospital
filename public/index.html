@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Citas Médicas</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>MediCitas</h1>
+                    <span>Sistema de Gestión Médica</span>
+                </div>
+                <nav class="nav" id="mainNav" style="display: none;">
+                    <div class="user-info">
+                        <span id="userName"></span>
+                        <span id="userRole" class="role-badge"></span>
+                    </div>
+                    <button class="btn btn-outline" onclick="logout()">Cerrar Sesión</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Landing Page -->
+        <section id="landingPage" class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h2>Infraestructura para el Futuro de la Atención Médica</h2>
+                        <p>Gestiona citas médicas de manera eficiente. Conecta pacientes con médicos especialistas de forma seamless y profesional.</p>
+                        <div class="hero-buttons">
+                            <button class="btn btn-primary" onclick="showLogin()">Iniciar Sesión</button>
+                            <button class="btn btn-outline" onclick="showRegister()">Registrarse</button>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="medical-card">
+                            <div class="card-header">
+                                <h3>Panel de Citas</h3>
+                                <span class="status-indicator"></span>
+                            </div>
+                            <div class="appointment-list">
+                                <div class="appointment-item">
+                                    <div class="appointment-time">09:00</div>
+                                    <div class="appointment-details">
+                                        <div class="patient-name">Dr. María González</div>
+                                        <div class="appointment-type">Cardiología</div>
+                                    </div>
+                                    <div class="appointment-status confirmed">Confirmada</div>
+                                </div>
+                                <div class="appointment-item">
+                                    <div class="appointment-time">10:30</div>
+                                    <div class="appointment-details">
+                                        <div class="patient-name">Dr. Carlos Rodríguez</div>
+                                        <div class="appointment-type">Medicina General</div>
+                                    </div>
+                                    <div class="appointment-status pending">Pendiente</div>
+                                </div>
+                                <div class="appointment-item">
+                                    <div class="appointment-time">14:00</div>
+                                    <div class="appointment-details">
+                                        <div class="patient-name">Dra. Ana Martínez</div>
+                                        <div class="appointment-type">Pediatría</div>
+                                    </div>
+                                    <div class="appointment-status confirmed">Confirmada</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Form -->
+        <section id="loginForm" class="auth-section" style="display: none;">
+            <div class="container">
+                <div class="auth-container">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <h2>Iniciar Sesión</h2>
+                            <p>Accede a tu cuenta médica</p>
+                        </div>
+                        <form id="loginFormElement">
+                            <div class="form-group">
+                                <label for="loginEmail">Email</label>
+                                <input type="email" id="loginEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Contraseña</label>
+                                <input type="password" id="loginPassword" name="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">Iniciar Sesión</button>
+                        </form>
+                        <div class="auth-footer">
+                            <p>¿No tienes cuenta? <a href="#" onclick="showRegister()">Regístrate aquí</a></p>
+                            <p><a href="#" onclick="showLanding()">← Volver al inicio</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Register Form -->
+        <section id="registerForm" class="auth-section" style="display: none;">
+            <div class="container">
+                <div class="auth-container">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <h2>Registro</h2>
+                            <p>Crea tu cuenta en el sistema</p>
+                        </div>
+                        <form id="registerFormElement">
+                            <div class="form-group">
+                                <label for="registerName">Nombre Completo</label>
+                                <input type="text" id="registerName" name="nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerEmail">Email</label>
+                                <input type="email" id="registerEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerPassword">Contraseña</label>
+                                <input type="password" id="registerPassword" name="password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerRole">Tipo de Usuario</label>
+                                <select id="registerRole" name="rol" required onchange="toggleEspecialidad()">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="paciente">Paciente</option>
+                                    <option value="medico">Médico</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="especialidadGroup" style="display: none;">
+                                <label for="registerEspecialidad">Especialidad</label>
+                                <input type="text" id="registerEspecialidad" name="especialidad" placeholder="Ej: Cardiología, Pediatría...">
+                            </div>
+                            <div class="form-group">
+                                <label for="registerTelefono">Teléfono</label>
+                                <input type="tel" id="registerTelefono" name="telefono" placeholder="+34-600-123-456">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">Registrarse</button>
+                        </form>
+                        <div class="auth-footer">
+                            <p>¿Ya tienes cuenta? <a href="#" onclick="showLogin()">Inicia sesión aquí</a></p>
+                            <p><a href="#" onclick="showLanding()">← Volver al inicio</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="dashboard-section" style="display: none;">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h2 id="dashboardTitle">Panel de Control</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" id="newAppointmentBtn" onclick="showNewAppointmentModal()" style="display: none;">
+                            Nueva Cita
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="dashboard-content">
+                    <!-- Paciente Dashboard -->
+                    <div id="pacienteDashboard" style="display: none;">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalCitasPaciente">0</div>
+                                <div class="stat-label">Citas Totales</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="citasPendientesPaciente">0</div>
+                                <div class="stat-label">Pendientes</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="citasConfirmadasPaciente">0</div>
+                                <div class="stat-label">Confirmadas</div>
+                            </div>
+                        </div>
+                        
+                        <div class="appointments-section">
+                            <h3>Mis Citas</h3>
+                            <div id="pacienteCitas" class="appointments-list">
+                                <!-- Las citas se cargarán aquí -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Médico Dashboard -->
+                    <div id="medicoDashboard" style="display: none;">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalCitasMedico">0</div>
+                                <div class="stat-label">Citas Totales</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="citasPendientesMedico">0</div>
+                                <div class="stat-label">Pendientes</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="citasHoyMedico">0</div>
+                                <div class="stat-label">Hoy</div>
+                            </div>
+                        </div>
+                        
+                        <div class="appointments-section">
+                            <h3>Citas Solicitadas</h3>
+                            <div id="medicoCitas" class="appointments-list">
+                                <!-- Las citas se cargarán aquí -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para Nueva Cita -->
+    <div id="newAppointmentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nueva Cita Médica</h3>
+                <button class="modal-close" onclick="closeNewAppointmentModal()">&times;</button>
+            </div>
+            <form id="newAppointmentForm">
+                <div class="form-group">
+                    <label for="appointmentMedico">Médico</label>
+                    <select id="appointmentMedico" name="medico_id" required>
+                        <option value="">Seleccionar médico...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentFecha">Fecha</label>
+                    <input type="date" id="appointmentFecha" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentHora">Hora</label>
+                    <input type="time" id="appointmentHora" name="hora" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentMotivo">Motivo de la consulta</label>
+                    <textarea id="appointmentMotivo" name="motivo" rows="3" placeholder="Describe brevemente el motivo de tu consulta..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeNewAppointmentModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Solicitar Cita</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
