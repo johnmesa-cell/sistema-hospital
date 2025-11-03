@@ -7,6 +7,7 @@ require("dotenv").config()
 const authRoutes = require("./routes/auth")
 const citasRoutes = require("./routes/citas")
 const usuariosRoutes = require("./routes/usuarios")
+const disponibilidadRoutes = require('./routes/disponibilidad');
 
 // Importar configuración de base de datos
 const { testConnection } = require("./config/database")
@@ -26,6 +27,8 @@ app.use(express.static(path.join(__dirname, "public")))
 app.use("/api/auth", authRoutes)
 app.use("/api/citas", citasRoutes)
 app.use("/api/usuarios", usuariosRoutes)
+app.use('/api/disponibilidad', disponibilidadRoutes)
+
 
 // Ruta principal - servir el frontend
 app.get("/", (req, res) => {

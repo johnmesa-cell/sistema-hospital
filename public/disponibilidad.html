@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mi disponibilidad</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    .wrap{max-width:900px;margin:32px auto;padding:16px;background:#fff;border-radius:12px}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    select,input,button,table{font-size:14px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #e5e7eb;padding:8px;text-align:left}
+    th{background:#f8fafc}
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <h1>MediCitas</h1>
+          <span>Sistema de Gestión Médica</span>
+        </div>
+        <nav class="nav">
+          <button class="btn btn-outline" onclick="window.location.href='/'">Regresar al Dashboard</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="container">
+      <div class="wrap">
+        <h2>Mi disponibilidad</h2>
+
+        <div class="row">
+          <label>Fecha</label>
+          <input id="fecha" type="text" placeholder="Selecciona fecha">
+
+          <label>Inicio</label>
+          <input id="inicio" type="time" value="08:00">
+
+          <label>Fin</label>
+          <input id="fin" type="time" value="12:00">
+
+          <label>Intervalo</label>
+          <select id="intervalo">
+            <option>15</option><option selected>30</option><option>45</option><option>60</option>
+          </select>
+
+                    <button id="agregar" class="btn btn-primary">Agregar tramo</button>
+        </div>
+
+        <h3>Tramos configurados</h3>
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Inicio</th><th>Fin</th><th>Intervalo</th><th></th></tr>
+          </thead>
+          <tbody id="lista"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    // 
+     // --- Auth ---
+  const API_BASE_URL = '/api';
+  const token = localStorage.getItem('authToken');
+
+  if (!token) {
+    alert('Por favor inicia sesión.');
+    window.location.href = '/';
+  }
+
+// ------------------------------------
+  // 2. Crear elementos visuales simples
+  // ------------------------------------
+  const who = document.createElement('div')
+  const badge = document.createElement('span')
+  who.id = 'who'
+  badge.id = 'roleBadge'
+  badge.style = 'margin-left:8px;padding:2px 8px;border-radius:12px;background:#e9d5ff;color:#6b21a8;font-weight:600;font-size:12px;'
+  who.appendChild(badge)
+  document.body.prepend(who)
+
+  // ------------------------------------
+  // 3. Función para verificar sesión
+  // ------------------------------------
+  async function verifyAndGuard() {
+    if (!token) {
+      alert('Por favor inicia sesión.')
+      window.location.href = '/'   // redirige al inicio
+      return false
+    }
+    try {
+      const resp = await fetch(`${API_BASE_URL}/auth/verify`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const result = await resp.json()
+
+      if (!result.success) {
+        alert('Sesión inválida. Vuelve a iniciar sesión.')
+        window.location.href = '/'
+        return false
+      }
+
+      const user = result.data.user
+      who.textContent = `Usuario: ${user.nombre} (${user.rol || ''}) `
+      badge.textContent = user.rol.toUpperCase()
+
+      if (user.rol !== 'medico') {
+        alert('Esta página es solo para MÉDICOS.')
+        window.location.href = '/'
+        return false
+      }
+
+      return true
+    } catch (e) {
+      console.error(e)
+      alert('No se pudo verificar la sesión. Intenta de nuevo.')
+      window.location.href = '/'
+      return false
+    }
+  }
+
+  // ------------------------------------
+  // 4. Llamar a la verificación
+  // ------------------------------------
+  verifyAndGuard()
+
+  // Mapea día (no usado ahora)
+
+  // Elementos
+  const fechaInput = document.getElementById('fecha');
+  const inicioInput = document.getElementById('inicio');
+  const finInput = document.getElementById('fin');
+  const intervalSel = document.getElementById('intervalo');
+  const btnAgregar = document.getElementById('agregar');
+  const tbody = document.getElementById('lista');
+
+  // Cargar lista
+  async function cargar() {
+    try {
+      const r = await fetch(`${API_BASE_URL}/disponibilidad/mia`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const result = await r.json();
+
+      const data = result.data || [];
+      tbody.innerHTML = '';
+      if (!data.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="5" style="color:#666">Sin tramos aún</td>';
+        tbody.appendChild(tr);
+        return;
+      }
+
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.fecha}</td>
+          <td>${row.hora_inicio}</td>
+          <td>${row.hora_fin}</td>
+          <td>${row.intervalo_minutos} min</td>
+          <td><button data-id="${row.id}" class="btn-del btn btn-outline">Eliminar</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.btn-del').forEach(b=>{
+        b.addEventListener('click', async () => {
+          if (!confirm('¿Eliminar este tramo?')) return;
+          const id = b.getAttribute('data-id');
+          const resp = await fetch(`${API_BASE_URL}/disponibilidad/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!resp.ok) { alert('No se pudo eliminar'); return; }
+          cargar();
+        });
+      });
+
+    } catch (e) {
+      console.error(e);
+      alert('Error cargando disponibilidad');
+    }
+  }
+
+  // Crear tramo
+  async function crear() {
+    try {
+      const body = {
+        fecha: fechaInput.value, // 'YYYY-MM-DD'
+        hora_inicio: inicioInput.value, // 'HH:MM'
+        hora_fin: finInput.value,       // 'HH:MM'
+        intervalo_minutos: Number(intervalSel.value)
+      };
+
+      const r = await fetch(`${API_BASE_URL}/disponibilidad`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(()=>({}));
+        alert(j.message || 'Error creando tramo');
+        return;
+      }
+      cargar();
+    } catch (e) {
+      console.error(e);
+      alert('Error creando tramo');
+    }
+  }
+
+  btnAgregar?.addEventListener('click', crear);
+  cargar();
+
+  // Inicializar Flatpickr
+  flatpickr(fechaInput, {
+    dateFormat: 'Y-m-d',
+    minDate: 'today'
+  });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</body>
+</html>
