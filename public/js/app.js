@@ -223,6 +223,12 @@ function updateUserInterface() {
       newAppointmentBtn.style.display = "none"
     }
 
+    // ⬇️ AQUI MISMO, justo después, añade esto:
+    const linkDisp = document.getElementById("linkDisponibilidad")
+    if (linkDisp) {
+      linkDisp.style.display = (currentUser.rol === "medico") ? "inline-block" : "none"
+    }
+
     // Actualizar título del dashboard
     const dashboardTitle = document.getElementById("dashboardTitle")
     if (currentUser.rol === "medico") {
@@ -625,3 +631,59 @@ window.addEventListener("click", (event) => {
     closeNewAppointmentModal()
   }
 })
+
+
+// --- Selectores del modal (usar los IDs reales del HTML de tu modal) ---
+const medicoSelect = document.getElementById("appointmentMedico"); // <select name="medico_id">
+const fechaInput   = document.getElementById("appointmentFecha");  // <input type="date" name="fecha">
+const horaSelect   = document.getElementById("appointmentHora");   // <select name="hora">
+
+async function cargarSlots() {
+  const medicoId = medicoSelect?.value;
+  const fechaISO = fechaInput?.value; // YYYY-MM-DD
+
+  if (!medicoId || !fechaISO) return;
+
+  // Limpiar opciones
+  horaSelect.innerHTML = '<option value="">Cargando...</option>';
+  horaSelect.disabled = true;
+
+  try {
+    const resp = await fetch(`${API_BASE_URL}/disponibilidad/${medicoId}/slots?fecha=${fechaISO}`, {
+      headers: { Authorization: `Bearer ${authToken}` } // <- IMPORTANTE
+    });
+    const result = await resp.json();
+    horaSelect.innerHTML = ''; // limpiar
+
+    // Nuestro backend retorna { success: true, data: ["08:00","08:30",...] }
+    const slots = Array.isArray(result.data) ? result.data : [];
+
+    if (slots.length) {
+      slots.forEach(hhmm => {
+        const opt = document.createElement('option');
+        opt.value = `${hhmm}:00`;   // el backend de /citas espera TIME completo 'HH:MM:00'
+        opt.textContent = hhmm;     // lo visible
+        horaSelect.appendChild(opt);
+      });
+      horaSelect.disabled = false;
+    } else {
+      horaSelect.innerHTML = '<option value="">Sin cupos</option>';
+      horaSelect.disabled = true;
+    }
+  } catch (e) {
+    console.error(e);
+    horaSelect.innerHTML = '<option value="">Error</option>';
+    horaSelect.disabled = true;
+  }
+}
+
+// Disparar cuando cambie médico o fecha (si existen en DOM)
+medicoSelect?.addEventListener('change', cargarSlots);
+fechaInput?.addEventListener('change', cargarSlots);
+
+// Si el modal se abre con valores cargados, llama a cargarSlots() al abrir el modal:
+function showNewAppointmentModal() {
+  document.getElementById("newAppointmentModal").style.display = "flex";
+  // si ya hay médico/fecha seleccionados, precarga:
+  cargarSlots();
+}
