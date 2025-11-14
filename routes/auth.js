@@ -6,7 +6,14 @@ const { verifyToken } = require("../middleware/auth")
 
 const router = express.Router()
 
+// Helper para normalizar email
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
 // Registro de usuario
+// Permite roles: admin, recepcionista, medico, paciente.
+// Opcionalmente restringe auto-registro de roles privilegiados con ALLOW_SELF_ADMIN_REG=false.
 router.post("/register", async (req, res) => {
   try {
     const { nombre, email, password, rol, especialidad, telefono } = req.body
@@ -19,10 +26,10 @@ router.post("/register", async (req, res) => {
       })
     }
 
-    if (!["medico", "paciente"].includes(rol)) {
+    if (!["medico", "paciente","admin"].includes(rol)) {
       return res.status(400).json({
         success: false,
-        message: 'Rol no válido. Debe ser "medico" o "paciente"',
+        message: 'Rol no válido. Debe ser "medico", "paciente" o "admin"',
       })
     }
 

@@ -14,7 +14,7 @@ router.post("/", verifyToken, verifyRole(["paciente"]), async (req, res) => {
     if (!medico_id || !fecha || !hora) {
       return res.status(400).json({
         success: false,
-        message: "Médico, fecha y hora son requeridos",
+        message: "Paciente, médico, fecha y hora son requeridos",
       })
     }
 
@@ -73,6 +73,43 @@ router.post("/", verifyToken, verifyRole(["paciente"]), async (req, res) => {
     })
   }
 })
+
+// Listado global de citas (admin/recepcionista)
+router.get("/", verifyToken, verifyRole(["admin", "recepcionista"]), async (req, res) => {
+  try {
+    const { estado, fecha, medico_id, paciente_id } = req.query;
+
+    const filters = [];
+    const params = [];
+
+    if (estado) { filters.push("c.estado = ?"); params.push(estado); }
+    if (fecha) { filters.push("c.fecha = ?"); params.push(fecha); }
+    if (medico_id) { filters.push("c.medico_id = ?"); params.push(medico_id); }
+    if (paciente_id) { filters.push("c.paciente_id = ?"); params.push(paciente_id); }
+
+    const where = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+
+    const [rows] = await pool.execute(
+      `
+      SELECT 
+        c.id, c.fecha, c.hora, c.motivo, c.estado,
+        p.id AS paciente_id, p.nombre AS paciente_nombre,
+        m.id AS medico_id, m.nombre AS medico_nombre, m.especialidad
+      FROM citas c
+      JOIN usuarios p ON p.id = c.paciente_id
+      JOIN usuarios m ON m.id = c.medico_id
+      ${where}
+      ORDER BY c.fecha DESC, c.hora DESC
+      `,
+      params
+    );
+
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Error listando citas:", error);
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
+  }
+});
 
 // Obtener citas del usuario actual
 router.get("/mis-citas", verifyToken, async (req, res) => {

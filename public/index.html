@@ -220,6 +220,47 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Admin Dashboard -->
+                    <div id="adminDashboard" style="display: none;">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalUsuariosAdmin">0</div>
+                                <div class="stat-label">Usuarios Registrados</div> 
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="usuariosActivos">0</div>
+                                <div class="stat-label">Usuarios Activos</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="reportesPendientes">0</div
+                                <div class="stat-label">Reportes Pendientes</div>
+                            </div>
+                        </div>
+                        <div class="admin-section">
+                            <h4>Gestión de Usuarios</h4>
+                            <table id="tablaUsuarios" class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <!-- La tabla de usuarios se cargará aquí -->
+                                <tbody>
+                                    <!-- Filas se cargarán dinámicamente con JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="admin-controls">
+                            <h4>Configuraciones Generales</h4>
+                            <button id="refrescarDatosBtn">Actualizar Datos</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
