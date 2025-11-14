@@ -15,7 +15,6 @@
                 <div class="logo">
                     <h1>MediCitas</h1>
                     <span>Sistema de Gestión Médica</span>
-                    <a id="linkDisponibilidad" href="/disponibilidad.html" class="btn btn-outline" style="display:none">Mi disponibilidad</a>
                 </div>
                 <nav class="nav" id="mainNav" style="display: none;">
                     <div class="user-info">
@@ -261,7 +260,6 @@
                             <button id="refrescarDatosBtn">Actualizar Datos</button>
                         </div>
                     </div>
-                </div>
             </div>
         </section>
     </main>
@@ -286,9 +284,7 @@
                 </div>
                 <div class="form-group">
                     <label for="appointmentHora">Hora</label>
-                    <select id="appointmentHora" name="hora" required>
-                        <option value="">Selecciona una hora</option>
-                    </select>
+                    <input type="time" id="appointmentHora" name="hora" required>
                 </div>
                 <div class="form-group">
                     <label for="appointmentMotivo">Motivo de la consulta</label>
