@@ -1,5 +1,3 @@
-![Imagen de WhatsApp 2025-10-15 a las 19 47 58_c6fee39a](https://github.com/user-attachments/assets/df58e0f6-9e0e-4c4c-8977-07dbbbe913e0)
-
 # Sistema de Gestión de Citas Médicas - MVP
 
 Un sistema completo para la gestión de citas médicas desarrollado como proyecto académico.

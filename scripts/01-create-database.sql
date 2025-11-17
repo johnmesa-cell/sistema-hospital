@@ -5,13 +5,14 @@
 CREATE DATABASE IF NOT EXISTS sistema_citas_medicas;
 USE sistema_citas_medicas;
 
--- Tabla de usuarios (médicos y pacientes)
+-- Tabla de usuarios (médicos, pacientes y administrador)
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    rol ENUM('medico', 'paciente') NOT NULL,
+    -- Agregado rol 'administrador' al ENUM
+    rol ENUM('medico', 'paciente', 'administrador') NOT NULL,
     especialidad VARCHAR(100) NULL, -- Solo para médicos
     telefono VARCHAR(20) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

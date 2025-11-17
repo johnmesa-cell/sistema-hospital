@@ -51,11 +51,19 @@ function setupEventListeners() {
   // Formulario de nueva cita
   document.getElementById("newAppointmentForm").addEventListener("submit", handleNewAppointment)
 
+  document.getElementById("rescheduleAppointmentForm").addEventListener("submit", handleRescheduleAppointment)
+
   // Configurar fecha mínima para citas (hoy)
   const fechaInput = document.getElementById("appointmentFecha")
   if (fechaInput) {
     const today = new Date().toISOString().split("T")[0]
     fechaInput.min = today
+  }
+
+  const rescheduleFechaInput = document.getElementById("rescheduleFecha")
+  if (rescheduleFechaInput) {
+    const today = new Date().toISOString().split("T")[0]
+    rescheduleFechaInput.min = today
   }
 }
 
@@ -207,60 +215,66 @@ function logout() {
   showLanding()
 }
 
-// --- FUNCIONES DE INTERFAZ DE USUARIO ---
+// Funciones de interfaz de usuario
 function updateUserInterface() {
-    if (currentUser) {
-        document.getElementById("userName").textContent = currentUser.nombre;
-        const roleElement = document.getElementById("userRole");
-        roleElement.textContent = currentUser.rol;
-        roleElement.className = `role-badge ${currentUser.rol}`;
-        const newAppointmentBtn = document.getElementById("newAppointmentBtn");
+  if (currentUser) {
+    document.getElementById("userName").textContent = currentUser.nombre
+    const roleElement = document.getElementById("userRole")
+    roleElement.textContent = currentUser.rol
+    roleElement.className = `role-badge ${currentUser.rol}`
 
-        if (currentUser.rol === "paciente") {
-            newAppointmentBtn.style.display = "block";
-        } else {
-            newAppointmentBtn.style.display = "none";
-        }
-
-        const dashboardTitle = document.getElementById("dashboardTitle");
-        if (currentUser.rol === "medico") {
-            dashboardTitle.textContent = `Panel Médico - ${currentUser.especialidad || "Medicina General"}`;
-        } else if (currentUser.rol === "admin") {
-            dashboardTitle.textContent = "Panel de Administrador";
-        } else {
-            dashboardTitle.textContent = "Panel del Paciente";
-        }
+    // Mostrar/ocultar botón de nueva cita según el rol
+    const newAppointmentBtn = document.getElementById("newAppointmentBtn")
+    if (currentUser.rol === "paciente") {
+      newAppointmentBtn.style.display = "block"
+    } else {
+      newAppointmentBtn.style.display = "none"
     }
+
+    // Actualizar título del dashboard
+    const dashboardTitle = document.getElementById("dashboardTitle")
+    if (currentUser.rol === "medico") {
+      dashboardTitle.textContent = `Panel Médico - ${currentUser.especialidad || "Medicina General"}`
+    } else {
+      dashboardTitle.textContent = "Panel del Paciente"
+    }
+  }
 }
 
-// --- FUNCIONES DEL DASHBOARD ---
+// Funciones del dashboard
 async function loadDashboardData() {
-  if (!currentUser) return;
+  if (!currentUser) return
+
   try {
-    showLoading(true);
-    await loadStatistics();
-    await loadAppointments();
+    showLoading(true)
 
-    // --- OCULTAR TODOS LOS PANELES ---
-    document.getElementById('pacienteDashboard').style.display = "none";
-    document.getElementById('medicoDashboard').style.display = "none";
-    document.getElementById('adminDashboard').style.display = "none";
+    // Cargar estadísticas
+    await loadStatistics()
 
-    // --- MOSTRAR SOLO EL PANEL DEL ROL ACTUAL ---
+    // Cargar citas
+    await loadAppointments()
+
+    // Mostrar dashboard apropiado según el rol
     if (currentUser.rol === "paciente") {
-      document.getElementById('pacienteDashboard').style.display = "block";
-      await loadMedicos();
-    } else if (currentUser.rol === "admin") {
-      document.getElementById('adminDashboard').style.display = "block";
-      // Aquí también puedes cargar datos específicos de admin si hace falta
+      document.getElementById("pacienteDashboard").style.display = "block"
+      document.getElementById("medicoDashboard").style.display = "none"
+      document.getElementById("adminDashboard").style.display = "none"
+      await loadMedicos() // Cargar lista de médicos para el modal
     } else if (currentUser.rol === "medico") {
-      document.getElementById('medicoDashboard').style.display = "block";
+      document.getElementById("pacienteDashboard").style.display = "none"
+      document.getElementById("medicoDashboard").style.display = "block"
+      document.getElementById("adminDashboard").style.display = "none"
+    } else if (currentUser.rol === "administrador") {
+      document.getElementById("pacienteDashboard").style.display = "none"
+      document.getElementById("medicoDashboard").style.display = "none"
+      document.getElementById("adminDashboard").style.display = "block"
+      await loadAdminData()
     }
   } catch (error) {
-    console.error("Error cargando dashboard:", error);
-    showToast("Error cargando datos del dashboard", "error");
+    console.error("Error cargando dashboard:", error)
+    showToast("Error cargando datos del dashboard", "error")
   } finally {
-    showLoading(false);
+    showLoading(false)
   }
 }
 
@@ -344,8 +358,11 @@ function renderPacienteCitas(citas) {
             </div>
             <div class="appointment-actions">
                 ${
-                  cita.estado === "pendiente"
+                  cita.estado === "pendiente" || cita.estado === "confirmada"
                     ? `
+                    <button class="btn btn-primary btn-sm" onclick="showRescheduleModal(${cita.id}, '${cita.fecha}', '${cita.hora}')">
+                        Reprogramar
+                    </button>
                     <button class="btn btn-outline btn-sm" onclick="cancelAppointment(${cita.id})">
                         Cancelar Cita
                     </button>
@@ -619,10 +636,312 @@ function showToast(message, type = "info") {
   })
 }
 
-// Cerrar modal al hacer clic fuera de él
+// Funciones para reprogramar citas
+function showRescheduleModal(citaId, fechaActual, horaActual) {
+  // Guardar ID de cita en un atributo del formulario
+  const form = document.getElementById("rescheduleAppointmentForm")
+  form.dataset.citaId = citaId
+
+  // Pre-llenar con los valores actuales
+  document.getElementById("rescheduleFecha").value = fechaActual
+  document.getElementById("rescheduleHora").value = horaActual.substring(0, 5) // Formato HH:MM
+
+  // Mostrar modal
+  document.getElementById("rescheduleAppointmentModal").style.display = "flex"
+}
+
+function closeRescheduleModal() {
+  document.getElementById("rescheduleAppointmentModal").style.display = "none"
+  document.getElementById("rescheduleAppointmentForm").reset()
+}
+
+async function handleRescheduleAppointment(event) {
+  event.preventDefault()
+
+  const form = event.target
+  const citaId = form.dataset.citaId
+  const formData = new FormData(form)
+
+  const rescheduleData = {
+    fecha: formData.get("fecha"),
+    hora: formData.get("hora") + ":00", // Agregar segundos
+  }
+
+  try {
+    showLoading(true)
+
+    const response = await fetch(`${API_BASE_URL}/citas/${citaId}/reprogramar`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(rescheduleData),
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      showToast("Cita reprogramada exitosamente", "success")
+      closeRescheduleModal()
+      loadDashboardData() // Recargar datos
+    } else {
+      showToast(result.message || "Error reprogramando la cita", "error")
+    }
+  } catch (error) {
+    console.error("Error reprogramando cita:", error)
+    showToast("Error de conexión", "error")
+  } finally {
+    showLoading(false)
+  }
+}
+
+// Cerrar modales al hacer clic fuera de ellos
 window.addEventListener("click", (event) => {
-  const modal = document.getElementById("newAppointmentModal")
-  if (event.target === modal) {
+  const newAppointmentModal = document.getElementById("newAppointmentModal")
+  const rescheduleModal = document.getElementById("rescheduleAppointmentModal")
+
+  if (event.target === newAppointmentModal) {
     closeNewAppointmentModal()
   }
+
+  if (event.target === rescheduleModal) {
+    closeRescheduleModal()
+  }
 })
+
+// Funciones de administrador
+async function loadAdminData() {
+  try {
+    await loadAdminStatistics()
+    await loadAllUsers()
+    await loadAllCitas()
+  } catch (error) {
+    console.error("Error cargando datos de administrador:", error)
+  }
+}
+
+async function loadAdminStatistics() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/estadisticas`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      const stats = result.data
+      document.getElementById("totalUsuarios").textContent = stats.total_usuarios
+      document.getElementById("totalMedicos").textContent = stats.total_medicos
+      document.getElementById("totalPacientes").textContent = stats.total_pacientes
+      document.getElementById("totalCitasAdmin").textContent = stats.total_citas
+      document.getElementById("citasPendientesAdmin").textContent = stats.citas_pendientes
+    }
+  } catch (error) {
+    console.error("Error cargando estadísticas:", error)
+  }
+}
+
+async function loadAllUsers() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/usuarios`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      renderAdminUsers(result.data)
+    }
+  } catch (error) {
+    console.error("Error cargando usuarios:", error)
+  }
+}
+
+function renderAdminUsers(usuarios) {
+  const tbody = document.getElementById("adminUsersTable")
+
+  if (usuarios.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay usuarios</td></tr>'
+    return
+  }
+
+  tbody.innerHTML = usuarios
+    .map(
+      (user) => `
+        <tr>
+            <td>${user.id}</td>
+            <td>${user.nombre}</td>
+            <td>${user.email}</td>
+            <td><span class="role-badge ${user.rol}">${user.rol}</span></td>
+            <td>${user.especialidad || "-"}</td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="showChangePasswordModal(${user.id}, '${user.nombre}')">
+                    Cambiar Contraseña
+                </button>
+                ${
+                  user.rol !== "administrador"
+                    ? `
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id}, '${user.nombre}')">
+                        Eliminar
+                    </button>
+                `
+                    : ""
+                }
+            </td>
+        </tr>
+    `,
+    )
+    .join("")
+}
+
+async function loadAllCitas() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/citas`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      renderAdminCitas(result.data)
+    }
+  } catch (error) {
+    console.error("Error cargando citas:", error)
+  }
+}
+
+function renderAdminCitas(citas) {
+  const tbody = document.getElementById("adminCitasTable")
+
+  if (citas.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay citas</td></tr>'
+    return
+  }
+
+  tbody.innerHTML = citas
+    .map(
+      (cita) => `
+        <tr>
+            <td>${cita.id}</td>
+            <td>${cita.paciente_nombre}</td>
+            <td>${cita.medico_nombre}</td>
+            <td>${cita.especialidad || "-"}</td>
+            <td>${formatDate(cita.fecha)}</td>
+            <td><span class="appointment-status ${cita.estado}">${getStatusText(cita.estado)}</span></td>
+            <td>
+                <button class="btn btn-sm btn-danger" onclick="deleteAdminCita(${cita.id})">
+                    Eliminar
+                </button>
+            </td>
+        </tr>
+    `,
+    )
+    .join("")
+}
+
+function showChangePasswordModal(userId, userName) {
+  const newPassword = prompt(`Ingrese nueva contraseña para ${userName}:`)
+
+  if (newPassword && newPassword.length >= 6) {
+    changeUserPassword(userId, newPassword)
+  } else if (newPassword) {
+    showToast("La contraseña debe tener al menos 6 caracteres", "error")
+  }
+}
+
+async function changeUserPassword(userId, newPassword) {
+  try {
+    showLoading(true)
+
+    const response = await fetch(`${API_BASE_URL}/admin/usuarios/${userId}/password`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ password: newPassword }),
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      showToast("Contraseña actualizada exitosamente", "success")
+    } else {
+      showToast(result.message || "Error actualizando contraseña", "error")
+    }
+  } catch (error) {
+    console.error("Error actualizando contraseña:", error)
+    showToast("Error de conexión", "error")
+  } finally {
+    showLoading(false)
+  }
+}
+
+async function deleteUser(userId, userName) {
+  if (!confirm(`¿Estás seguro de que quieres eliminar al usuario ${userName}?`)) {
+    return
+  }
+
+  try {
+    showLoading(true)
+
+    const response = await fetch(`${API_BASE_URL}/admin/usuarios/${userId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      showToast("Usuario eliminado exitosamente", "success")
+      loadAdminData() // Recargar datos
+    } else {
+      showToast(result.message || "Error eliminando usuario", "error")
+    }
+  } catch (error) {
+    console.error("Error eliminando usuario:", error)
+    showToast("Error de conexión", "error")
+  } finally {
+    showLoading(false)
+  }
+}
+
+async function deleteAdminCita(citaId) {
+  if (!confirm("¿Estás seguro de que quieres eliminar esta cita?")) {
+    return
+  }
+
+  try {
+    showLoading(true)
+
+    const response = await fetch(`${API_BASE_URL}/admin/citas/${citaId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      showToast("Cita eliminada exitosamente", "success")
+      loadAdminData() // Recargar datos
+    } else {
+      showToast(result.message || "Error eliminando cita", "error")
+    }
+  } catch (error) {
+    console.error("Error eliminando cita:", error)
+    showToast("Error de conexión", "error")
+  } finally {
+    showLoading(false)
+  }
+}

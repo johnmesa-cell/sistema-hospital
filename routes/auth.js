@@ -2,18 +2,11 @@ const express = require("express")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const { pool } = require("../config/database")
-const { verifyToken } = require("../middleware/auth")
+const { authenticateToken } = require("../middleware/auth")
 
 const router = express.Router()
 
-// Helper para normalizar email
-function normalizeEmail(email) {
-  return String(email || "").trim().toLowerCase();
-}
-
 // Registro de usuario
-// Permite roles: admin, recepcionista, medico, paciente.
-// Opcionalmente restringe auto-registro de roles privilegiados con ALLOW_SELF_ADMIN_REG=false.
 router.post("/register", async (req, res) => {
   try {
     const { nombre, email, password, rol, especialidad, telefono } = req.body
@@ -26,10 +19,10 @@ router.post("/register", async (req, res) => {
       })
     }
 
-    if (!["medico", "paciente","admin"].includes(rol)) {
+    if (!["medico", "paciente"].includes(rol)) {
       return res.status(400).json({
         success: false,
-        message: 'Rol no válido. Debe ser "medico", "paciente" o "admin"',
+        message: 'Rol no válido. Debe ser "medico" o "paciente"',
       })
     }
 
@@ -146,7 +139,7 @@ router.post("/login", async (req, res) => {
 })
 
 // Verificar token (para mantener sesión)
-router.get("/verify", verifyToken, (req, res) => {
+router.get("/verify", authenticateToken, (req, res) => {
   res.json({
     success: true,
     message: "Token válido",
@@ -157,7 +150,7 @@ router.get("/verify", verifyToken, (req, res) => {
 })
 
 // Cerrar sesión (opcional - el frontend puede simplemente eliminar el token)
-router.post("/logout", verifyToken, (req, res) => {
+router.post("/logout", authenticateToken, (req, res) => {
   res.json({
     success: true,
     message: "Sesión cerrada exitosamente",

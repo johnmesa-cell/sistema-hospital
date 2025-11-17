@@ -136,6 +136,7 @@
                                     <option value="">Seleccionar...</option>
                                     <option value="paciente">Paciente</option>
                                     <option value="medico">Médico</option>
+                                    <option value="administrador">Administrador</option>
                                 </select>
                             </div>
                             <div class="form-group" id="especialidadGroup" style="display: none;">
@@ -220,46 +221,77 @@
                         </div>
                     </div>
 
-                    <!-- Admin Dashboard -->
+                    <!-- Dashboard de Administrador -->
                     <div id="adminDashboard" style="display: none;">
                         <div class="stats-grid">
                             <div class="stat-card">
-                                <div class="stat-number" id="totalUsuariosAdmin">0</div>
-                                <div class="stat-label">Usuarios Registrados</div> 
+                                <div class="stat-number" id="totalUsuarios">0</div>
+                                <div class="stat-label">Total Usuarios</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-number" id="usuariosActivos">0</div>
-                                <div class="stat-label">Usuarios Activos</div>
+                                <div class="stat-number" id="totalMedicos">0</div>
+                                <div class="stat-label">Médicos</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-number" id="reportesPendientes">0</div
-                                <div class="stat-label">Reportes Pendientes</div>
+                                <div class="stat-number" id="totalPacientes">0</div>
+                                <div class="stat-label">Pacientes</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalCitasAdmin">0</div>
+                                <div class="stat-label">Total Citas</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="citasPendientesAdmin">0</div>
+                                <div class="stat-label">Citas Pendientes</div>
                             </div>
                         </div>
+
+                        <!-- Sección de Usuarios -->
                         <div class="admin-section">
-                            <h4>Gestión de Usuarios</h4>
-                            <table id="tablaUsuarios" class="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Email</th>
-                                        <th>Rol</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <!-- La tabla de usuarios se cargará aquí -->
-                                <tbody>
-                                    <!-- Filas se cargarán dinámicamente con JS -->
-                                </tbody>
-                            </table>
+                            <h3>Gestión de Usuarios</h3>
+                            <div class="table-container">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Email</th>
+                                            <th>Rol</th>
+                                            <th>Especialidad</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminUsersTable">
+                                        <!-- Los usuarios se cargarán aquí -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        
-                        <div class="admin-controls">
-                            <h4>Configuraciones Generales</h4>
-                            <button id="refrescarDatosBtn">Actualizar Datos</button>
+
+                        <!-- Sección de Citas -->
+                        <div class="admin-section">
+                            <h3>Gestión de Citas</h3>
+                            <div class="table-container">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Paciente</th>
+                                            <th>Médico</th>
+                                            <th>Especialidad</th>
+                                            <th>Fecha</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminCitasTable">
+                                        <!-- Las citas se cargarán aquí -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+                </div>
             </div>
         </section>
     </main>
@@ -293,6 +325,31 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" onclick="closeNewAppointmentModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Solicitar Cita</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Reprogramar Cita -->
+    <div id="rescheduleAppointmentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reprogramar Cita</h3>
+                <button class="modal-close" onclick="closeRescheduleModal()">&times;</button>
+            </div>
+            <form id="rescheduleAppointmentForm">
+                <div class="form-group">
+                    <label for="rescheduleFecha">Nueva Fecha</label>
+                    <input type="date" id="rescheduleFecha" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="rescheduleHora">Nueva Hora</label>
+                    <input type="time" id="rescheduleHora" name="hora" min="08:00" max="18:00" required>
+                    <small>Horario de atención: 8:00 AM - 6:00 PM</small>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeRescheduleModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Confirmar Reprogramación</button>
                 </div>
             </form>
         </div>

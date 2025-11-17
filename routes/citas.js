@@ -1,11 +1,11 @@
 const express = require("express")
 const { pool } = require("../config/database")
-const { verifyToken, verifyRole } = require("../middleware/auth")
+const { authenticateToken, verifyRole } = require("../middleware/auth")
 
 const router = express.Router()
 
 // Crear nueva cita (solo pacientes)
-router.post("/", verifyToken, verifyRole(["paciente"]), async (req, res) => {
+router.post("/", authenticateToken, verifyRole(["paciente"]), async (req, res) => {
   try {
     const { medico_id, fecha, hora, motivo } = req.body
     const paciente_id = req.user.id
@@ -14,7 +14,7 @@ router.post("/", verifyToken, verifyRole(["paciente"]), async (req, res) => {
     if (!medico_id || !fecha || !hora) {
       return res.status(400).json({
         success: false,
-        message: "Paciente, médico, fecha y hora son requeridos",
+        message: "Médico, fecha y hora son requeridos",
       })
     }
 
@@ -74,45 +74,8 @@ router.post("/", verifyToken, verifyRole(["paciente"]), async (req, res) => {
   }
 })
 
-// Listado global de citas (admin/recepcionista)
-router.get("/", verifyToken, verifyRole(["admin", "recepcionista"]), async (req, res) => {
-  try {
-    const { estado, fecha, medico_id, paciente_id } = req.query;
-
-    const filters = [];
-    const params = [];
-
-    if (estado) { filters.push("c.estado = ?"); params.push(estado); }
-    if (fecha) { filters.push("c.fecha = ?"); params.push(fecha); }
-    if (medico_id) { filters.push("c.medico_id = ?"); params.push(medico_id); }
-    if (paciente_id) { filters.push("c.paciente_id = ?"); params.push(paciente_id); }
-
-    const where = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
-
-    const [rows] = await pool.execute(
-      `
-      SELECT 
-        c.id, c.fecha, c.hora, c.motivo, c.estado,
-        p.id AS paciente_id, p.nombre AS paciente_nombre,
-        m.id AS medico_id, m.nombre AS medico_nombre, m.especialidad
-      FROM citas c
-      JOIN usuarios p ON p.id = c.paciente_id
-      JOIN usuarios m ON m.id = c.medico_id
-      ${where}
-      ORDER BY c.fecha DESC, c.hora DESC
-      `,
-      params
-    );
-
-    res.json({ success: true, data: rows });
-  } catch (error) {
-    console.error("Error listando citas:", error);
-    res.status(500).json({ success: false, message: "Error interno del servidor" });
-  }
-});
-
 // Obtener citas del usuario actual
-router.get("/mis-citas", verifyToken, async (req, res) => {
+router.get("/mis-citas", authenticateToken, async (req, res) => {
   try {
     let query, params
 
@@ -164,7 +127,7 @@ router.get("/mis-citas", verifyToken, async (req, res) => {
 })
 
 // Obtener estadísticas de citas del usuario
-router.get("/estadisticas", verifyToken, async (req, res) => {
+router.get("/estadisticas", authenticateToken, async (req, res) => {
   try {
     let queries = {}
     const userId = req.user.id
@@ -224,7 +187,7 @@ router.get("/estadisticas", verifyToken, async (req, res) => {
 })
 
 // Actualizar estado de cita (solo médicos)
-router.put("/:id/estado", verifyToken, verifyRole(["medico"]), async (req, res) => {
+router.put("/:id/estado", authenticateToken, verifyRole(["medico"]), async (req, res) => {
   try {
     const { id } = req.params
     const { estado } = req.body
@@ -280,7 +243,7 @@ router.put("/:id/estado", verifyToken, verifyRole(["medico"]), async (req, res) 
 })
 
 // Cancelar cita (pacientes pueden cancelar sus propias citas)
-router.delete("/:id", verifyToken, async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params
     const userId = req.user.id
@@ -330,7 +293,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
 })
 
 // Obtener horarios disponibles de un médico en una fecha específica
-router.get("/horarios-disponibles/:medico_id/:fecha", verifyToken, async (req, res) => {
+router.get("/horarios-disponibles/:medico_id/:fecha", authenticateToken, async (req, res) => {
   try {
     const { medico_id, fecha } = req.params
 
@@ -375,6 +338,79 @@ router.get("/horarios-disponibles/:medico_id/:fecha", verifyToken, async (req, r
     })
   } catch (error) {
     console.error("Error obteniendo horarios disponibles:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    })
+  }
+})
+
+// Reprogramar cita (solo pacientes)
+router.put("/:id/reprogramar", authenticateToken, verifyRole(["paciente"]), async (req, res) => {
+  try {
+    const { id } = req.params
+    const { fecha, hora } = req.body
+    const paciente_id = req.user.id
+
+    // Validaciones
+    if (!fecha || !hora) {
+      return res.status(400).json({
+        success: false,
+        message: "Fecha y hora son requeridos",
+      })
+    }
+
+    // Verificar que la cita existe y pertenece al paciente
+    const [citas] = await pool.execute("SELECT medico_id FROM citas WHERE id = ? AND paciente_id = ?", [
+      id,
+      paciente_id,
+    ])
+
+    if (citas.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Cita no encontrada o no autorizada",
+      })
+    }
+
+    const medico_id = citas[0].medico_id
+
+    // Verificar que no haya conflicto de horario con el mismo médico
+    const [conflictos] = await pool.execute(
+      'SELECT id FROM citas WHERE medico_id = ? AND fecha = ? AND hora = ? AND estado != "cancelada" AND id != ?',
+      [medico_id, fecha, hora, id],
+    )
+
+    if (conflictos.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "El médico ya tiene una cita programada en ese horario",
+      })
+    }
+
+    // Actualizar la cita
+    await pool.execute('UPDATE citas SET fecha = ?, hora = ?, estado = "pendiente" WHERE id = ?', [fecha, hora, id])
+
+    // Obtener cita actualizada
+    const [citaActualizada] = await pool.execute(
+      `
+            SELECT 
+                c.id, c.fecha, c.hora, c.motivo, c.estado,
+                m.nombre as medico_nombre, m.especialidad
+            FROM citas c
+            JOIN usuarios m ON c.medico_id = m.id
+            WHERE c.id = ?
+        `,
+      [id],
+    )
+
+    res.json({
+      success: true,
+      message: "Cita reprogramada exitosamente",
+      data: citaActualizada[0],
+    })
+  } catch (error) {
+    console.error("Error reprogramando cita:", error)
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
