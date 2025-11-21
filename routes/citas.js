@@ -84,9 +84,15 @@ router.get("/mis-citas", authenticateToken, async (req, res) => {
       query = `
                 SELECT 
                     c.id, c.fecha, c.hora, c.motivo, c.estado, c.created_at,
-                    m.nombre as medico_nombre, m.especialidad, m.telefono as medico_telefono
+                    m.nombre as medico_nombre, m.especialidad, m.telefono as medico_telefono,
+                    CASE WHEN hc.id IS NOT NULL THEN 1 ELSE 0 END as tiene_historia_clinica,
+                    hc.id as historia_clinica_id,
+                    CASE WHEN rm.id IS NOT NULL THEN 1 ELSE 0 END as tiene_receta,
+                    rm.id as receta_id
                 FROM citas c
                 JOIN usuarios m ON c.medico_id = m.id
+                LEFT JOIN historia_clinica hc ON c.id = hc.cita_id
+                LEFT JOIN recetas_medicas rm ON c.id = rm.cita_id
                 WHERE c.paciente_id = ?
                 ORDER BY c.fecha DESC, c.hora DESC
             `
@@ -96,9 +102,18 @@ router.get("/mis-citas", authenticateToken, async (req, res) => {
       query = `
                 SELECT 
                     c.id, c.fecha, c.hora, c.motivo, c.estado, c.created_at,
-                    p.nombre as paciente_nombre, p.telefono as paciente_telefono
+                    p.nombre as paciente_nombre, p.telefono as paciente_telefono, p.id as paciente_id,
+                    CASE WHEN hc.id IS NOT NULL THEN 1 ELSE 0 END as tiene_historia_clinica,
+                    hc.id as historia_clinica_id,
+                    hc.diagnostico,
+                    hc.tratamiento,
+                    CASE WHEN rm.id IS NOT NULL THEN 1 ELSE 0 END as tiene_receta,
+                    rm.id as receta_id,
+                    (SELECT COUNT(*) FROM receta_medicamentos WHERE receta_id = rm.id) as total_medicamentos
                 FROM citas c
                 JOIN usuarios p ON c.paciente_id = p.id
+                LEFT JOIN historia_clinica hc ON c.id = hc.cita_id
+                LEFT JOIN recetas_medicas rm ON c.id = rm.cita_id
                 WHERE c.medico_id = ?
                 ORDER BY c.fecha DESC, c.hora DESC
             `
@@ -345,6 +360,80 @@ router.get("/horarios-disponibles/:medico_id/:fecha", authenticateToken, async (
   }
 })
 
+// Obtener cita específica con información completa
+router.get("/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user.id
+    const userRole = req.user.rol
+
+    let query, params
+
+    if (userRole === "paciente") {
+      query = `
+        SELECT 
+          c.id, c.fecha, c.hora, c.motivo, c.estado, c.created_at,
+          m.nombre as medico_nombre, m.especialidad, m.telefono as medico_telefono,
+          CASE WHEN hc.id IS NOT NULL THEN 1 ELSE 0 END as tiene_historia_clinica,
+          hc.id as historia_clinica_id,
+          CASE WHEN rm.id IS NOT NULL THEN 1 ELSE 0 END as tiene_receta,
+          rm.id as receta_id
+        FROM citas c
+        JOIN usuarios m ON c.medico_id = m.id
+        LEFT JOIN historia_clinica hc ON c.id = hc.cita_id
+        LEFT JOIN recetas_medicas rm ON c.id = rm.cita_id
+        WHERE c.id = ? AND c.paciente_id = ?
+      `
+      params = [id, userId]
+    } else if (userRole === "medico") {
+      query = `
+        SELECT 
+          c.id, c.fecha, c.hora, c.motivo, c.estado, c.created_at,
+          p.nombre as paciente_nombre, p.telefono as paciente_telefono, p.id as paciente_id,
+          CASE WHEN hc.id IS NOT NULL THEN 1 ELSE 0 END as tiene_historia_clinica,
+          hc.id as historia_clinica_id,
+          hc.diagnostico,
+          hc.tratamiento,
+          CASE WHEN rm.id IS NOT NULL THEN 1 ELSE 0 END as tiene_receta,
+          rm.id as receta_id,
+          (SELECT COUNT(*) FROM receta_medicamentos WHERE receta_id = rm.id) as total_medicamentos
+        FROM citas c
+        JOIN usuarios p ON c.paciente_id = p.id
+        LEFT JOIN historia_clinica hc ON c.id = hc.cita_id
+        LEFT JOIN recetas_medicas rm ON c.id = rm.cita_id
+        WHERE c.id = ? AND c.medico_id = ?
+      `
+      params = [id, userId]
+    } else {
+      return res.status(403).json({
+        success: false,
+        message: "Rol no autorizado",
+      })
+    }
+
+    const [citas] = await pool.execute(query, params)
+
+    if (citas.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Cita no encontrada o no autorizada",
+      })
+    }
+
+    res.json({
+      success: true,
+      message: "Cita obtenida exitosamente",
+      data: citas[0],
+    })
+  } catch (error) {
+    console.error("Error obteniendo cita:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    })
+  }
+})
+
 // Reprogramar cita (solo pacientes)
 router.put("/:id/reprogramar", authenticateToken, verifyRole(["paciente"]), async (req, res) => {
   try {
@@ -414,6 +503,48 @@ router.put("/:id/reprogramar", authenticateToken, verifyRole(["paciente"]), asyn
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
+    })
+  }
+})
+
+// Obtener citas de un médico en una fecha específica (para verificar disponibilidad)
+router.get("/medico/:medicoId", authenticateToken, async (req, res) => {
+  try {
+    const { medicoId } = req.params
+    const { fecha } = req.query
+
+    let query = `
+      SELECT 
+        c.id,
+        c.fecha,
+        c.hora,
+        c.estado,
+        u.nombre as paciente_nombre
+      FROM citas c
+      JOIN usuarios u ON c.paciente_id = u.id
+      WHERE c.medico_id = ? AND c.estado != 'cancelada'
+    `
+    
+    let params = [medicoId]
+
+    if (fecha) {
+      query += " AND c.fecha = ?"
+      params.push(fecha)
+    }
+
+    query += " ORDER BY c.fecha ASC, c.hora ASC"
+
+    const [rows] = await pool.execute(query, params)
+
+    res.json({
+      success: true,
+      data: rows
+    })
+  } catch (error) {
+    console.error("Error obteniendo citas del médico:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error obteniendo citas del médico"
     })
   }
 })

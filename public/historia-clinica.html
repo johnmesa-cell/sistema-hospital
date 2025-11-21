@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia Clínica - Sistema de Citas Médicas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/historia-clinica.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2><i class="bi bi-file-medical"></i> Historia Clínica</h2>
+                        <small class="text-muted" id="userInfo"></small>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" onclick="volverAlDashboard()">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Información de la cita -->
+                <div class="card mb-4" id="citaInfo" style="display: none;">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Información de la Cita</h5>
+                    </div>
+                    <div class="card-body" id="citaDetails">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Formulario de Historia Clínica -->
+                <div class="card" id="historiaClinicaForm" style="display: none;">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-file-medical-fill"></i> Nueva Historia Clínica</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="formHistoriaClinica">
+                            <input type="hidden" id="paciente_id" name="paciente_id">
+                            <input type="hidden" id="cita_id" name="cita_id">
+
+                            <div class="row">
+                                <!-- Datos de la consulta -->
+                                <div class="col-md-12 mb-3">
+                                    <h6 class="text-primary"><i class="bi bi-clipboard-pulse"></i> Datos de la Consulta</h6>
+                                </div>
+                                
+                                <div class="col-md-12 mb-3">
+                                    <label for="motivo_consulta" class="form-label">Motivo de Consulta *</label>
+                                    <textarea class="form-control" id="motivo_consulta" name="motivo_consulta" rows="3" required></textarea>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="sintomas" class="form-label">Síntomas</label>
+                                    <textarea class="form-control" id="sintomas" name="sintomas" rows="3"></textarea>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="examen_fisico" class="form-label">Examen Físico</label>
+                                    <textarea class="form-control" id="examen_fisico" name="examen_fisico" rows="3"></textarea>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="diagnostico" class="form-label">Diagnóstico *</label>
+                                    <textarea class="form-control" id="diagnostico" name="diagnostico" rows="3" required></textarea>
+                                </div>
+
+                                <!-- Signos vitales -->
+                                <div class="col-md-12 mb-3 mt-3">
+                                    <h6 class="text-primary"><i class="bi bi-heart-pulse"></i> Signos Vitales</h6>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="presion_arterial" class="form-label">Presión Arterial</label>
+                                    <input type="text" class="form-control" id="presion_arterial" name="presion_arterial" placeholder="120/80">
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="frecuencia_cardiaca" class="form-label">Frecuencia Cardíaca</label>
+                                    <input type="text" class="form-control" id="frecuencia_cardiaca" name="frecuencia_cardiaca" placeholder="72 bpm">
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="temperatura" class="form-label">Temperatura</label>
+                                    <input type="text" class="form-control" id="temperatura" name="temperatura" placeholder="36.5°C">
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="peso" class="form-label">Peso (kg)</label>
+                                    <input type="number" step="0.1" class="form-control" id="peso" name="peso">
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="altura" class="form-label">Altura (cm)</label>
+                                    <input type="number" step="0.1" class="form-control" id="altura" name="altura">
+                                </div>
+
+                                <!-- Tratamiento y recomendaciones -->
+                                <div class="col-md-12 mb-3 mt-3">
+                                    <h6 class="text-primary"><i class="bi bi-prescription2"></i> Tratamiento y Recomendaciones</h6>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="tratamiento" class="form-label">Tratamiento</label>
+                                    <textarea class="form-control" id="tratamiento" name="tratamiento" rows="3"></textarea>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="recomendaciones" class="form-label">Recomendaciones</label>
+                                    <textarea class="form-control" id="recomendaciones" name="recomendaciones" rows="3"></textarea>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="observaciones" class="form-label">Observaciones Adicionales</label>
+                                    <textarea class="form-control" id="observaciones" name="observaciones" rows="3"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Guardar Historia Clínica
+                                </button>
+                                <button type="button" class="btn btn-info" onclick="mostrarFormularioReceta()">
+                                    <i class="bi bi-prescription"></i> Crear Receta Médica
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Ver Historia Clínica Existente -->
+                <div class="card" id="verHistoriaClinica" style="display: none;">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="bi bi-eye-fill"></i> Historia Clínica Registrada</h5>
+                    </div>
+                    <div class="card-body" id="historiaClinicaContent">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Historial médico del paciente -->
+                <div class="card mt-4" id="historialPaciente" style="display: none;">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-journal-medical"></i> Historial Médico del Paciente</h5>
+                    </div>
+                    <div class="card-body" id="historialContent">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para receta médica -->
+    <div class="modal fade" id="modalReceta" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-prescription"></i> Crear Receta Médica</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formReceta">
+                        <input type="hidden" id="receta_paciente_id" name="paciente_id">
+                        <input type="hidden" id="receta_cita_id" name="cita_id">
+                        <input type="hidden" id="receta_historia_clinica_id" name="historia_clinica_id">
+
+                        <div class="mb-3">
+                            <label for="receta_diagnostico" class="form-label">Diagnóstico *</label>
+                            <textarea class="form-control" id="receta_diagnostico" name="diagnostico" rows="2" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="indicaciones_generales" class="form-label">Indicaciones Generales</label>
+                            <textarea class="form-control" id="indicaciones_generales" name="indicaciones_generales" rows="2"></textarea>
+                        </div>
+
+                        <h6 class="text-primary mb-3"><i class="bi bi-capsule"></i> Medicamentos</h6>
+                        
+                        <div id="medicamentosContainer">
+                            <!-- Los medicamentos se agregarán dinámicamente aquí -->
+                        </div>
+
+                        <button type="button" class="btn btn-outline-primary mb-3" onclick="agregarMedicamento()">
+                            <i class="bi bi-plus-circle"></i> Agregar Medicamento
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarReceta()">
+                        <i class="bi bi-check-circle"></i> Guardar Receta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/historia-clinica.js"></script>
+</body>
+</html>

@@ -13,8 +13,8 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <h1>MediCitas</h1>
-                    <span>Sistema de Gestión Médica</span>
+                    <img src="images/medical-icon.png" alt="Ícono médico" class="logo-icon">
+                    <h1>Salud y vida Bogotá</h1>
                 </div>
                 <nav class="nav" id="mainNav" style="display: none;">
                     <div class="user-info">
@@ -33,46 +33,15 @@
         <section id="landingPage" class="hero">
             <div class="container">
                 <div class="hero-content">
+                    <div class="hero-visual">
+                        <img src="images/medical-team.png" alt="Equipo médico profesional" class="medical-team-image">
+                    </div>
                     <div class="hero-text">
-                        <h2>Infraestructura para el Futuro de la Atención Médica</h2>
-                        <p>Gestiona citas médicas de manera eficiente. Conecta pacientes con médicos especialistas de forma seamless y profesional.</p>
+                        <h2>Bienvenido a Salud y vida Bogotá</h2>
+                        <p>Conectamos pacientes y médicos especialistas de manera eficiente para una atención médica superior en la ciudad. Agende citas, gestione su historial y acceda a los mejores cuidados.</p>
                         <div class="hero-buttons">
                             <button class="btn btn-primary" onclick="showLogin()">Iniciar Sesión</button>
                             <button class="btn btn-outline" onclick="showRegister()">Registrarse</button>
-                        </div>
-                    </div>
-                    <div class="hero-visual">
-                        <div class="medical-card">
-                            <div class="card-header">
-                                <h3>Panel de Citas</h3>
-                                <span class="status-indicator"></span>
-                            </div>
-                            <div class="appointment-list">
-                                <div class="appointment-item">
-                                    <div class="appointment-time">09:00</div>
-                                    <div class="appointment-details">
-                                        <div class="patient-name">Dr. María González</div>
-                                        <div class="appointment-type">Cardiología</div>
-                                    </div>
-                                    <div class="appointment-status confirmed">Confirmada</div>
-                                </div>
-                                <div class="appointment-item">
-                                    <div class="appointment-time">10:30</div>
-                                    <div class="appointment-details">
-                                        <div class="patient-name">Dr. Carlos Rodríguez</div>
-                                        <div class="appointment-type">Medicina General</div>
-                                    </div>
-                                    <div class="appointment-status pending">Pendiente</div>
-                                </div>
-                                <div class="appointment-item">
-                                    <div class="appointment-time">14:00</div>
-                                    <div class="appointment-details">
-                                        <div class="patient-name">Dra. Ana Martínez</div>
-                                        <div class="appointment-type">Pediatría</div>
-                                    </div>
-                                    <div class="appointment-status confirmed">Confirmada</div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -136,7 +105,6 @@
                                     <option value="">Seleccionar...</option>
                                     <option value="paciente">Paciente</option>
                                     <option value="medico">Médico</option>
-                                    <option value="administrador">Administrador</option>
                                 </select>
                             </div>
                             <div class="form-group" id="especialidadGroup" style="display: none;">
@@ -188,6 +156,18 @@
                             </div>
                         </div>
                         
+                        <!-- Tools Section for Patients -->
+                        <div class="medical-tools-section">
+                            <h3>Mis Herramientas</h3>
+                            <div class="tools-grid">
+                                <div class="tool-card" onclick="abrirHistorialMedico()">
+                                    <div class="tool-icon">📋</div>
+                                    <div class="tool-title">Mi Historial Médico</div>
+                                    <div class="tool-description">Ver historias clínicas y recetas</div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="appointments-section">
                             <h3>Mis Citas</h3>
                             <div id="pacienteCitas" class="appointments-list">
@@ -210,6 +190,18 @@
                             <div class="stat-card">
                                 <div class="stat-number" id="citasHoyMedico">0</div>
                                 <div class="stat-label">Hoy</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Medical Tools Section -->
+                        <div class="medical-tools-section">
+                            <h3>Herramientas del Médico</h3>
+                            <div class="tools-grid">
+                                <div class="tool-card" onclick="window.location.href='disponibilidad.html'">
+                                    <div class="tool-icon">📅</div>
+                                    <div class="tool-title">Mi Disponibilidad</div>
+                                    <div class="tool-description">Gestionar horarios de atención</div>
+                                </div>
                             </div>
                         </div>
                         
@@ -306,17 +298,21 @@
             <form id="newAppointmentForm">
                 <div class="form-group">
                     <label for="appointmentMedico">Médico</label>
-                    <select id="appointmentMedico" name="medico_id" required>
+                    <select id="appointmentMedico" name="medico_id" required onchange="loadMedicoDisponibilidad()">
                         <option value="">Seleccionar médico...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="appointmentFecha">Fecha</label>
-                    <input type="date" id="appointmentFecha" name="fecha" required>
+                    <label for="appointmentFecha">Fecha Disponible</label>
+                    <select id="appointmentFecha" name="fecha" required onchange="loadHorasDisponibles()" disabled>
+                        <option value="">Primero selecciona un médico</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="appointmentHora">Hora</label>
-                    <input type="time" id="appointmentHora" name="hora" required>
+                    <label for="appointmentHora">Hora Disponible</label>
+                    <select id="appointmentHora" name="hora" required disabled>
+                        <option value="">Primero selecciona una fecha</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="appointmentMotivo">Motivo de la consulta</label>

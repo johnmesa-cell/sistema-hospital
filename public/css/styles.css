@@ -95,11 +95,23 @@ body {
   align-items: center;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
 .logo h1 {
   font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--primary-color);
-  margin-bottom: var(--spacing-1);
+  margin: 0;
 }
 
 .logo span {
@@ -147,53 +159,96 @@ body {
 
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+  background: var(--white);
   padding: var(--spacing-16) 0;
-  min-height: 80vh;
+  min-height: 90vh;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .hero-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-12);
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
+  gap: var(--spacing-12);
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .hero-text h2 {
-  font-size: var(--font-size-4xl);
+  font-size: 2.5rem;
   font-weight: 700;
   color: var(--gray-900);
   margin-bottom: var(--spacing-6);
   line-height: 1.2;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .hero-text p {
   font-size: var(--font-size-lg);
-  color: var(--gray-600);
+  color: var(--gray-700);
   margin-bottom: var(--spacing-8);
   line-height: 1.6;
+  text-align: center;
 }
 
 .hero-buttons {
   display: flex;
+  flex-direction: row;
   gap: var(--spacing-4);
+  width: 100%;
+  max-width: 500px;
+  justify-content: center;
+  margin: 0 auto;
 }
 
 /* Medical Card Visual */
 .hero-visual {
   display: flex;
   justify-content: center;
+  align-items: center;
+  order: 1;
 }
 
-.medical-card {
-  background: var(--white);
-  border-radius: var(--border-radius-xl);
-  padding: var(--spacing-6);
-  box-shadow: var(--shadow-xl);
+.medical-team-image {
   width: 100%;
   max-width: 400px;
+  height: auto;
+}
+
+.hero-text {
+  order: 2;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  line-height: 1;
+  width: auto;
+  min-height: auto;
+}
+
+/* Botones específicos del hero */
+.hero-buttons .btn {
+  padding: var(--spacing-4) var(--spacing-8);
+  border-radius: 50px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  width: 100%;
+  min-height: 50px;
 }
 
 .card-header {
@@ -400,25 +455,29 @@ body {
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
   color: var(--white);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
 }
 
 .btn-outline {
   background-color: transparent;
-  color: var(--primary-color);
-  border: 1px solid var(--primary-color);
+  color: var(--gray-700);
+  border: 2px solid var(--gray-300);
 }
 
 .btn-outline:hover {
-  background-color: var(--primary-color);
-  color: var(--white);
+  background-color: var(--gray-50);
+  border-color: var(--gray-400);
+  color: var(--gray-800);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .btn-full {
@@ -518,6 +577,13 @@ body {
   box-shadow: 0 0 0 3px rgb(76 29 149 / 0.1);
 }
 
+.form-group select:disabled {
+  background-color: var(--gray-100);
+  color: var(--gray-500);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .form-group textarea {
   resize: vertical;
   min-height: 80px;
@@ -543,37 +609,47 @@ body {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--spacing-6);
-  margin-bottom: var(--spacing-8);
+  margin-bottom: var(--spacing-12);
 }
 
 .stat-card {
   background: var(--white);
-  padding: var(--spacing-6);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow);
+  padding: var(--spacing-8);
+  border-radius: var(--border-radius-xl);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   text-align: center;
+  border: 1px solid var(--gray-100);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
 .stat-number {
-  font-size: var(--font-size-3xl);
+  font-size: 3rem;
   font-weight: 700;
   color: var(--primary-color);
-  margin-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  line-height: 1;
 }
 
 .stat-label {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   color: var(--gray-600);
   font-weight: 500;
+  margin: 0;
 }
 
 .appointments-section {
   background: var(--white);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-6);
-  box-shadow: var(--shadow);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-8);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--gray-100);
 }
 
 .appointments-section h3 {
@@ -581,6 +657,58 @@ body {
   font-weight: 600;
   color: var(--gray-900);
   margin-bottom: var(--spacing-6);
+}
+
+/* Estilos para herramientas médicas */
+.medical-tools-section {
+  margin-bottom: var(--spacing-8);
+}
+
+.medical-tools-section h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-6);
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.tool-card {
+  background: var(--white);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-8);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--gray-100);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.tool-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.tool-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-4);
+}
+
+.tool-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-2);
+}
+
+.tool-description {
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+  line-height: 1.5;
 }
 
 .appointments-list {
@@ -904,4 +1032,499 @@ body {
     padding: 4px 8px;
     font-size: 0.75rem;
   }
+}
+
+/* Estilos para herramientas del médico */
+.medical-tools-section {
+  margin-bottom: 24px;
+}
+
+.medical-tools-section h3 {
+  color: #111827;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.tool-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.tool-card:active {
+  transform: translateY(0);
+}
+
+.tool-card .tool-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.tool-card .tool-title {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.tool-card .tool-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.tool-card:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.tool-card:hover:before {
+  transform: scaleX(1);
+}
+
+/* Estilos para toast notifications */
+.toast {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  color: #111827;
+  font-size: 14px;
+  margin-bottom: 8px;
+  opacity: 0;
+  padding: 16px 20px;
+  position: relative;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+  min-width: 300px;
+  border-left: 4px solid #6b7280;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-success {
+  border-left-color: #10b981;
+  background: #f0fdf4;
+}
+
+.toast-error {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.toast-warning {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.toast-info {
+  border-left-color: #3b82f6;
+  background: #eff6ff;
+}
+
+@media (max-width: 768px) {
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .toast {
+    min-width: 280px;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
+
+/* Estilos para Historia Clínica y Recetas Médicas */
+.medical-info {
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-success {
+  background-color: var(--success-color);
+  color: var(--white);
+}
+
+.badge-info {
+  background-color: var(--accent-color);
+  color: var(--white);
+}
+
+.badge-warning {
+  background-color: var(--warning-color);
+  color: var(--white);
+}
+
+/* Historia Clínica Específicos */
+.receta-header {
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.medicamento-item {
+  border-left: 3px solid var(--success-color);
+  padding-left: 1rem;
+  margin-bottom: 1rem;
+  background: var(--gray-50);
+  padding: var(--spacing-4);
+  border-radius: var(--border-radius);
+}
+
+.medicamento-item h6 {
+  color: var(--success-color);
+  margin-bottom: var(--spacing-3);
+}
+
+.firma-section {
+  border-top: 1px solid var(--gray-200);
+  margin-top: 2rem;
+  padding-top: 1rem;
+}
+
+/* Formularios de Historia Clínica */
+.form-section {
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-4);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  background: var(--white);
+}
+
+.form-section h6 {
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.signos-vitales {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-4);
+}
+
+/* Estilos para medicamentos en formulario */
+.medicamento-form-card {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  background: var(--white);
+}
+
+.medicamento-form-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.form-control {
+  width: 100%;
+  padding: var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgb(76 29 149 / 0.1);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--spacing-2);
+  font-weight: 500;
+  color: var(--gray-700);
+  font-size: var(--font-size-sm);
+}
+
+/* Estilos para receta imprimible */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .card {
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+  }
+  
+  .receta-header {
+    border-bottom: 2px solid #000 !important;
+  }
+  
+  .medicamento-item {
+    border-left: 3px solid #000 !important;
+    background: white !important;
+  }
+  
+  .firma-section {
+    border-top: 1px solid #000 !important;
+  }
+}
+
+/* Responsive para historia clínica */
+@media (max-width: 768px) {
+  .signos-vitales {
+    grid-template-columns: 1fr;
+  }
+  
+  .medicamento-form-card .card-header {
+    flex-direction: column;
+    gap: var(--spacing-2);
+    align-items: stretch;
+  }
+  
+  .receta-header .row {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+}
+
+/* Estados adicionales para botones */
+.btn-success {
+  background-color: var(--success-color);
+  color: var(--white);
+  border: 1px solid var(--success-color);
+}
+
+.btn-success:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.btn-info {
+  background-color: var(--accent-color);
+  color: var(--white);
+  border: 1px solid var(--accent-color);
+}
+
+.btn-info:hover {
+  background-color: #0891b2;
+  border-color: #0891b2;
+}
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: var(--white);
+  border: 1px solid var(--warning-color);
+}
+
+.btn-warning:hover {
+  background-color: #d97706;
+  border-color: #d97706;
+}
+
+.btn-secondary {
+  background-color: var(--gray-600);
+  color: var(--white);
+  border: 1px solid var(--gray-600);
+}
+
+.btn-secondary:hover {
+  background-color: var(--gray-700);
+  border-color: var(--gray-700);
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.btn-outline-danger {
+  background-color: transparent;
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+}
+
+.btn-outline-danger:hover {
+  background-color: var(--error-color);
+  color: var(--white);
+}
+
+.btn-outline-secondary {
+  background-color: transparent;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-600);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--gray-600);
+  color: var(--white);
+}
+
+.btn-outline-info {
+  background-color: transparent;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+}
+
+.btn-outline-info:hover {
+  background-color: var(--accent-color);
+  color: var(--white);
+}
+
+/* Alertas Bootstrap-like */
+.alert {
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+}
+
+.alert-info {
+  color: #055160;
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+}
+
+.alert-success {
+  color: #0f5132;
+  background-color: #d1e7dd;
+  border-color: #badbcc;
+}
+
+.alert-warning {
+  color: #664d03;
+  background-color: #fff3cd;
+  border-color: #ffecb5;
+}
+
+.alert-danger {
+  color: #842029;
+  background-color: #f8d7da;
+  border-color: #f5c2c7;
+}
+
+/* Estilos para resumen de consulta más pequeño */
+.resumen-consulta {
+    font-size: 0.75rem !important;
+    line-height: 1.3 !important;
+}
+
+.resumen-consulta small {
+    font-size: 0.7rem !important;
+}
+
+.resumen-consulta span {
+    font-size: 0.75rem !important;
+}
+
+/* Estilo para el resumen de la historia clínica */
+.historia-resumen-texto {
+    font-size: 0.75rem !important;
+    line-height: 1.3 !important;
+}
+
+.historia-resumen-texto strong {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+}
+
+/* Estilo específico para badges de medicamentos */
+.badge.bg-success,
+.badge.bg-secondary {
+    font-size: 0.65rem !important;
+    padding: 0.25rem 0.5rem !important;
+}
+
+.badge.bg-success i,
+.badge.bg-secondary i {
+    font-size: 0.6rem !important;
+    margin-right: 0.25rem !important;
+}
+
+/* Estilo para el título del resumen de consulta */
+.resumen-titulo {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.75rem !important;
+    line-height: 1.2 !important;
+    margin-left: -15px !important;
+    padding-left: 0 !important;
+}
+
+.resumen-titulo i {
+    margin-right: 0.5rem !important;
+    font-size: 1rem !important;
+}
+
+/* Ajustar alineación del contenido del resumen */
+.resumen-consulta .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.resumen-consulta .col-md-8,
+.resumen-consulta .col-md-4 {
+    padding-left: 0 !important;
+}
+
+.resumen-consulta .mb-2 {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
 }

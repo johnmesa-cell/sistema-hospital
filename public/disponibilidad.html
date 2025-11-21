@@ -1,237 +1,270 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mi disponibilidad</title>
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <style>
-    .wrap{max-width:900px;margin:32px auto;padding:16px;background:#fff;border-radius:12px}
-    .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-    select,input,button,table{font-size:14px}
-    table{width:100%;border-collapse:collapse}
-    th,td{border:1px solid #e5e7eb;padding:8px;text-align:left}
-    th{background:#f8fafc}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Disponibilidad - Salud y vida Bogotá</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .disponibilidad-wrap {
+            max-width: 900px;
+            margin: 32px auto;
+            padding: 24px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            align-items: end;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .availability-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .availability-table th,
+        .availability-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .availability-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .availability-table td {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .availability-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            opacity: 0.5;
+        }
+        
+        .page-header {
+            margin-bottom: 32px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 8px 0;
+        }
+        
+        .page-description {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin: 32px 0 16px 0;
+        }
+        
+        .user-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .user-info .user-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .role-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="container">
-      <div class="header-content">
-        <div class="logo">
-          <h1>MediCitas</h1>
-          <span>Sistema de Gestión Médica</span>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="images/medical-icon.png" alt="Ícono médico" class="logo-icon">
+                    <h1>Salud y vida Bogotá</h1>
+                </div>
+                <nav class="nav">
+                    <button class="btn btn-outline" onclick="window.location.href='/'">
+                        Volver
+                    </button>
+                </nav>
+            </div>
         </div>
-        <nav class="nav">
-          <button class="btn btn-outline" onclick="window.location.href='/'">Regresar al Dashboard</button>
-        </nav>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Main Content -->
-  <main class="main">
-    <div class="container">
-      <div class="wrap">
-        <h2>Mi disponibilidad</h2>
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- User Info -->
+            <div id="userInfo" class="user-info" style="display: none;">
+                <div class="user-details">
+                    <span id="userName"></span>
+                    <span id="userRole" class="role-badge"></span>
+                </div>
+            </div>
 
-        <div class="row">
-          <label>Fecha</label>
-          <input id="fecha" type="text" placeholder="Selecciona fecha">
+            <div class="disponibilidad-wrap">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1 class="page-title">Mi Disponibilidad</h1>
+                    <p class="page-description">
+                        Configure sus horarios de atención para que los pacientes puedan agendar citas.
+                    </p>
+                </div>
 
-          <label>Inicio</label>
-          <input id="inicio" type="time" value="08:00">
+                <!-- Form to Add Availability -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fecha">Fecha</label>
+                        <input id="fecha" type="text" placeholder="Selecciona una fecha" readonly>
+                    </div>
 
-          <label>Fin</label>
-          <input id="fin" type="time" value="12:00">
+                    <div class="form-group">
+                        <label for="inicio">Hora de inicio</label>
+                        <input id="inicio" type="time" value="08:00" min="06:00" max="22:00">
+                    </div>
 
-          <label>Intervalo</label>
-          <select id="intervalo">
-            <option>15</option><option selected>30</option><option>45</option><option>60</option>
-          </select>
+                    <div class="form-group">
+                        <label for="fin">Hora de fin</label>
+                        <input id="fin" type="time" value="12:00" min="06:00" max="22:00">
+                    </div>
 
-                    <button id="agregar" class="btn btn-primary">Agregar tramo</button>
+                    <div class="form-group">
+                        <label for="intervalo">Intervalo (minutos)</label>
+                        <select id="intervalo">
+                            <option value="15">15 minutos</option>
+                            <option value="30" selected>30 minutos</option>
+                            <option value="45">45 minutos</option>
+                            <option value="60">60 minutos</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button id="agregar" class="btn btn-primary">
+                            Agregar Tramo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Available Slots Table -->
+                <h2 class="section-title">Tramos Configurados</h2>
+                <table class="availability-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora de Inicio</th>
+                            <th>Hora de Fin</th>
+                            <th>Intervalo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaDisponibilidad">
+                        <!-- Los datos se cargarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
         </div>
+    </main>
 
-        <h3>Tramos configurados</h3>
-        <table>
-          <thead>
-            <tr><th>Fecha</th><th>Inicio</th><th>Fin</th><th>Intervalo</th><th></th></tr>
-          </thead>
-          <tbody id="lista"></tbody>
-        </table>
-      </div>
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
     </div>
-  </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script>
-    // 
-     // --- Auth ---
-  const API_BASE_URL = '/api';
-  const token = localStorage.getItem('authToken');
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
 
-  if (!token) {
-    alert('Por favor inicia sesión.');
-    window.location.href = '/';
-  }
-
-// ------------------------------------
-  // 2. Crear elementos visuales simples
-  // ------------------------------------
-  const who = document.createElement('div')
-  const badge = document.createElement('span')
-  who.id = 'who'
-  badge.id = 'roleBadge'
-  badge.style = 'margin-left:8px;padding:2px 8px;border-radius:12px;background:#e9d5ff;color:#6b21a8;font-weight:600;font-size:12px;'
-  who.appendChild(badge)
-  document.body.prepend(who)
-
-  // ------------------------------------
-  // 3. Función para verificar sesión
-  // ------------------------------------
-  async function verifyAndGuard() {
-    if (!token) {
-      alert('Por favor inicia sesión.')
-      window.location.href = '/'   // redirige al inicio
-      return false
-    }
-    try {
-      const resp = await fetch(`${API_BASE_URL}/auth/verify`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const result = await resp.json()
-
-      if (!result.success) {
-        alert('Sesión inválida. Vuelve a iniciar sesión.')
-        window.location.href = '/'
-        return false
-      }
-
-      const user = result.data.user
-      who.textContent = `Usuario: ${user.nombre} (${user.rol || ''}) `
-      badge.textContent = user.rol.toUpperCase()
-
-      if (user.rol !== 'medico') {
-        alert('Esta página es solo para MÉDICOS.')
-        window.location.href = '/'
-        return false
-      }
-
-      return true
-    } catch (e) {
-      console.error(e)
-      alert('No se pudo verificar la sesión. Intenta de nuevo.')
-      window.location.href = '/'
-      return false
-    }
-  }
-
-  // ------------------------------------
-  // 4. Llamar a la verificación
-  // ------------------------------------
-  verifyAndGuard()
-
-  // Mapea día (no usado ahora)
-
-  // Elementos
-  const fechaInput = document.getElementById('fecha');
-  const inicioInput = document.getElementById('inicio');
-  const finInput = document.getElementById('fin');
-  const intervalSel = document.getElementById('intervalo');
-  const btnAgregar = document.getElementById('agregar');
-  const tbody = document.getElementById('lista');
-
-  // Cargar lista
-  async function cargar() {
-    try {
-      const r = await fetch(`${API_BASE_URL}/disponibilidad/mia`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const result = await r.json();
-
-      const data = result.data || [];
-      tbody.innerHTML = '';
-      if (!data.length) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="5" style="color:#666">Sin tramos aún</td>';
-        tbody.appendChild(tr);
-        return;
-      }
-
-      data.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${row.fecha}</td>
-          <td>${row.hora_inicio}</td>
-          <td>${row.hora_fin}</td>
-          <td>${row.intervalo_minutos} min</td>
-          <td><button data-id="${row.id}" class="btn-del btn btn-outline">Eliminar</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.querySelectorAll('.btn-del').forEach(b=>{
-        b.addEventListener('click', async () => {
-          if (!confirm('¿Eliminar este tramo?')) return;
-          const id = b.getAttribute('data-id');
-          const resp = await fetch(`${API_BASE_URL}/disponibilidad/${id}`, {
-            method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (!resp.ok) { alert('No se pudo eliminar'); return; }
-          cargar();
-        });
-      });
-
-    } catch (e) {
-      console.error(e);
-      alert('Error cargando disponibilidad');
-    }
-  }
-
-  // Crear tramo
-  async function crear() {
-    try {
-      const body = {
-        fecha: fechaInput.value, // 'YYYY-MM-DD'
-        hora_inicio: inicioInput.value, // 'HH:MM'
-        hora_fin: finInput.value,       // 'HH:MM'
-        intervalo_minutos: Number(intervalSel.value)
-      };
-
-      const r = await fetch(`${API_BASE_URL}/disponibilidad`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(body)
-      });
-      if (!r.ok) {
-        const j = await r.json().catch(()=>({}));
-        alert(j.message || 'Error creando tramo');
-        return;
-      }
-      cargar();
-    } catch (e) {
-      console.error(e);
-      alert('Error creando tramo');
-    }
-  }
-
-  btnAgregar?.addEventListener('click', crear);
-  cargar();
-
-  // Inicializar Flatpickr
-  flatpickr(fechaInput, {
-    dateFormat: 'Y-m-d',
-    minDate: 'today'
-  });
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="js/disponibilidad.js"></script>
 </body>
 </html>

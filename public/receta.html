@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receta Médica - Sistema de Citas Médicas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+            }
+            .card {
+                border: 1px solid #000 !important;
+                box-shadow: none !important;
+            }
+        }
+        
+        .receta-header {
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .medicamento-item {
+            border-left: 3px solid #198754;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .firma-section {
+            border-top: 1px solid #dee2e6;
+            margin-top: 2rem;
+            padding-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-4">
+        <!-- Controles de navegación y impresión -->
+        <div class="row mb-4 no-print">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <button onclick="window.close()" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Cerrar
+                    </button>
+                    <button onclick="window.print()" class="btn btn-primary">
+                        <i class="bi bi-printer"></i> Imprimir Receta
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido de la receta -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Header de la receta -->
+                        <div class="receta-header text-center">
+                            <h2 class="text-primary mb-3">
+                                <i class="bi bi-hospital"></i> RECETA MÉDICA
+                            </h2>
+                            <div class="row" id="recetaHeader">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Información del paciente -->
+                        <div class="row mb-4" id="pacienteInfo">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+
+                        <!-- Diagnóstico -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="bi bi-clipboard-pulse"></i> DIAGNÓSTICO
+                                </h5>
+                                <p class="border p-3 rounded bg-light" id="diagnostico">
+                                    <!-- Se llenará dinámicamente -->
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Prescripción (Medicamentos) -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="bi bi-prescription"></i> PRESCRIPCIÓN
+                                </h5>
+                                <div id="medicamentos">
+                                    <!-- Se llenará dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Indicaciones generales -->
+                        <div class="row mb-4" id="indicacionesSection" style="display: none;">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="bi bi-info-circle"></i> INDICACIONES GENERALES
+                                </h5>
+                                <p class="border p-3 rounded bg-light" id="indicaciones">
+                                    <!-- Se llenará dinámicamente -->
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Firma y datos del médico -->
+                        <div class="firma-section">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Fecha de emisión:</strong> <span id="fechaEmision"></span></p>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <div class="mb-5"></div>
+                                    <div class="border-top pt-2" style="border-top: 1px solid #000 !important; width: 250px; margin-left: auto;">
+                                        <p class="mb-1"><strong id="nombreMedico"></strong></p>
+                                        <p class="mb-1"><span id="especialidadMedico"></span></p>
+                                        <p class="mb-0">Tel: <span id="telefonoMedico"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer con información adicional -->
+                        <div class="row mt-4 pt-3 border-top">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    <i class="bi bi-shield-check"></i> 
+                                    Esta receta es válida únicamente para el paciente especificado.
+                                    <br>
+                                    Sistema de Gestión de Citas Médicas
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensaje de carga -->
+        <div class="row" id="loadingMessage">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2">Cargando receta médica...</p>
+            </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div class="row" id="errorMessage" style="display: none;">
+            <div class="col-12">
+                <div class="alert alert-danger text-center">
+                    <h4><i class="bi bi-exclamation-triangle"></i> Error</h4>
+                    <p id="errorText">No se pudo cargar la receta médica.</p>
+                    <button onclick="window.close()" class="btn btn-secondary mt-3">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/receta.js"></script>
+</body>
+</html>

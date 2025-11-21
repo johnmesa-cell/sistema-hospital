@@ -4,6 +4,37 @@ const { authenticateToken } = require("../middleware/auth")
 
 const router = express.Router()
 
+// Obtener usuarios con filtro opcional por rol
+router.get("/", authenticateToken, async (req, res) => {
+  try {
+    const { rol } = req.query
+    
+    let query = 'SELECT id, nombre, email, rol, especialidad, telefono FROM usuarios'
+    let params = []
+    
+    if (rol) {
+      query += ' WHERE rol = ?'
+      params.push(rol)
+    }
+    
+    query += ' ORDER BY nombre'
+    
+    const [usuarios] = await pool.execute(query, params)
+
+    res.json({
+      success: true,
+      message: "Usuarios obtenidos exitosamente",
+      data: usuarios,
+    })
+  } catch (error) {
+    console.error("Error obteniendo usuarios:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    })
+  }
+})
+
 // Obtener todos los médicos (para que los pacientes puedan elegir)
 router.get("/medicos", authenticateToken, async (req, res) => {
   try {
