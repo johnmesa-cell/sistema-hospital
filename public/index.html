@@ -13,8 +13,8 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <img src="images/medical-icon.png" alt="Ícono médico" class="logo-icon">
-                    <h1>Salud y vida Bogotá</h1>
+                    <h1>MediCitas</h1>
+                    <span>Sistema de Gestión Médica</span>
                 </div>
                 <nav class="nav" id="mainNav" style="display: none;">
                     <div class="user-info">
@@ -33,15 +33,46 @@
         <section id="landingPage" class="hero">
             <div class="container">
                 <div class="hero-content">
-                    <div class="hero-visual">
-                        <img src="images/medical-team.png" alt="Equipo médico profesional" class="medical-team-image">
-                    </div>
                     <div class="hero-text">
-                        <h2>Bienvenido a Salud y vida Bogotá</h2>
-                        <p>Conectamos pacientes y médicos especialistas de manera eficiente para una atención médica superior en la ciudad. Agende citas, gestione su historial y acceda a los mejores cuidados.</p>
+                        <h2>Infraestructura para el Futuro de la Atención Médica</h2>
+                        <p>Gestiona citas médicas de manera eficiente. Conecta pacientes con médicos especialistas de forma seamless y profesional.</p>
                         <div class="hero-buttons">
                             <button class="btn btn-primary" onclick="showLogin()">Iniciar Sesión</button>
                             <button class="btn btn-outline" onclick="showRegister()">Registrarse</button>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="medical-card">
+                            <div class="card-header">
+                                <h3>Panel de Citas</h3>
+                                <span class="status-indicator"></span>
+                            </div>
+                            <div class="appointment-list">
+                                <div class="appointment-item">
+                                    <div class="appointment-time">09:00</div>
+                                    <div class="appointment-details">
+                                        <div class="patient-name">Dr. María González</div>
+                                        <div class="appointment-type">Cardiología</div>
+                                    </div>
+                                    <div class="appointment-status confirmed">Confirmada</div>
+                                </div>
+                                <div class="appointment-item">
+                                    <div class="appointment-time">10:30</div>
+                                    <div class="appointment-details">
+                                        <div class="patient-name">Dr. Carlos Rodríguez</div>
+                                        <div class="appointment-type">Medicina General</div>
+                                    </div>
+                                    <div class="appointment-status pending">Pendiente</div>
+                                </div>
+                                <div class="appointment-item">
+                                    <div class="appointment-time">14:00</div>
+                                    <div class="appointment-details">
+                                        <div class="patient-name">Dra. Ana Martínez</div>
+                                        <div class="appointment-type">Pediatría</div>
+                                    </div>
+                                    <div class="appointment-status confirmed">Confirmada</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -156,18 +187,6 @@
                             </div>
                         </div>
                         
-                        <!-- Tools Section for Patients -->
-                        <div class="medical-tools-section">
-                            <h3>Mis Herramientas</h3>
-                            <div class="tools-grid">
-                                <div class="tool-card" onclick="abrirHistorialMedico()">
-                                    <div class="tool-icon">📋</div>
-                                    <div class="tool-title">Mi Historial Médico</div>
-                                    <div class="tool-description">Ver historias clínicas y recetas</div>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <div class="appointments-section">
                             <h3>Mis Citas</h3>
                             <div id="pacienteCitas" class="appointments-list">
@@ -193,18 +212,6 @@
                             </div>
                         </div>
                         
-                        <!-- Medical Tools Section -->
-                        <div class="medical-tools-section">
-                            <h3>Herramientas del Médico</h3>
-                            <div class="tools-grid">
-                                <div class="tool-card" onclick="window.location.href='disponibilidad.html'">
-                                    <div class="tool-icon">📅</div>
-                                    <div class="tool-title">Mi Disponibilidad</div>
-                                    <div class="tool-description">Gestionar horarios de atención</div>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <div class="appointments-section">
                             <h3>Citas Solicitadas</h3>
                             <div id="medicoCitas" class="appointments-list">
@@ -213,77 +220,46 @@
                         </div>
                     </div>
 
-                    <!-- Dashboard de Administrador -->
+                    <!-- Admin Dashboard -->
                     <div id="adminDashboard" style="display: none;">
                         <div class="stats-grid">
                             <div class="stat-card">
-                                <div class="stat-number" id="totalUsuarios">0</div>
-                                <div class="stat-label">Total Usuarios</div>
+                                <div class="stat-number" id="totalUsuariosAdmin">0</div>
+                                <div class="stat-label">Usuarios Registrados</div> 
                             </div>
                             <div class="stat-card">
-                                <div class="stat-number" id="totalMedicos">0</div>
-                                <div class="stat-label">Médicos</div>
+                                <div class="stat-number" id="usuariosActivos">0</div>
+                                <div class="stat-label">Usuarios Activos</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-number" id="totalPacientes">0</div>
-                                <div class="stat-label">Pacientes</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="totalCitasAdmin">0</div>
-                                <div class="stat-label">Total Citas</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number" id="citasPendientesAdmin">0</div>
-                                <div class="stat-label">Citas Pendientes</div>
+                                <div class="stat-number" id="reportesPendientes">0</div
+                                <div class="stat-label">Reportes Pendientes</div>
                             </div>
                         </div>
-
-                        <!-- Sección de Usuarios -->
                         <div class="admin-section">
-                            <h3>Gestión de Usuarios</h3>
-                            <div class="table-container">
-                                <table class="admin-table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Nombre</th>
-                                            <th>Email</th>
-                                            <th>Rol</th>
-                                            <th>Especialidad</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="adminUsersTable">
-                                        <!-- Los usuarios se cargarán aquí -->
-                                    </tbody>
-                                </table>
-                            </div>
+                            <h4>Gestión de Usuarios</h4>
+                            <table id="tablaUsuarios" class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <!-- La tabla de usuarios se cargará aquí -->
+                                <tbody>
+                                    <!-- Filas se cargarán dinámicamente con JS -->
+                                </tbody>
+                            </table>
                         </div>
-
-                        <!-- Sección de Citas -->
-                        <div class="admin-section">
-                            <h3>Gestión de Citas</h3>
-                            <div class="table-container">
-                                <table class="admin-table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Paciente</th>
-                                            <th>Médico</th>
-                                            <th>Especialidad</th>
-                                            <th>Fecha</th>
-                                            <th>Estado</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="adminCitasTable">
-                                        <!-- Las citas se cargarán aquí -->
-                                    </tbody>
-                                </table>
-                            </div>
+                        
+                        <div class="admin-controls">
+                            <h4>Configuraciones Generales</h4>
+                            <button id="refrescarDatosBtn">Actualizar Datos</button>
                         </div>
                     </div>
-                </div>
             </div>
         </section>
     </main>
@@ -298,21 +274,17 @@
             <form id="newAppointmentForm">
                 <div class="form-group">
                     <label for="appointmentMedico">Médico</label>
-                    <select id="appointmentMedico" name="medico_id" required onchange="loadMedicoDisponibilidad()">
+                    <select id="appointmentMedico" name="medico_id" required>
                         <option value="">Seleccionar médico...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="appointmentFecha">Fecha Disponible</label>
-                    <select id="appointmentFecha" name="fecha" required onchange="loadHorasDisponibles()" disabled>
-                        <option value="">Primero selecciona un médico</option>
-                    </select>
+                    <label for="appointmentFecha">Fecha</label>
+                    <input type="date" id="appointmentFecha" name="fecha" required>
                 </div>
                 <div class="form-group">
-                    <label for="appointmentHora">Hora Disponible</label>
-                    <select id="appointmentHora" name="hora" required disabled>
-                        <option value="">Primero selecciona una fecha</option>
-                    </select>
+                    <label for="appointmentHora">Hora</label>
+                    <input type="time" id="appointmentHora" name="hora" required>
                 </div>
                 <div class="form-group">
                     <label for="appointmentMotivo">Motivo de la consulta</label>
@@ -321,31 +293,6 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" onclick="closeNewAppointmentModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Solicitar Cita</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Reprogramar Cita -->
-    <div id="rescheduleAppointmentModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Reprogramar Cita</h3>
-                <button class="modal-close" onclick="closeRescheduleModal()">&times;</button>
-            </div>
-            <form id="rescheduleAppointmentForm">
-                <div class="form-group">
-                    <label for="rescheduleFecha">Nueva Fecha</label>
-                    <input type="date" id="rescheduleFecha" name="fecha" required>
-                </div>
-                <div class="form-group">
-                    <label for="rescheduleHora">Nueva Hora</label>
-                    <input type="time" id="rescheduleHora" name="hora" min="08:00" max="18:00" required>
-                    <small>Horario de atención: 8:00 AM - 6:00 PM</small>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline" onclick="closeRescheduleModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Confirmar Reprogramación</button>
                 </div>
             </form>
         </div>
