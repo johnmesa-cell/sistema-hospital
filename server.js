@@ -1,6 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 const path = require("path")
+const { testConnection } = require("./config/database")
 require("dotenv").config()
 
 // Importar rutas
@@ -8,9 +9,9 @@ const authRoutes = require("./routes/auth")
 const citasRoutes = require("./routes/citas")
 const usuariosRoutes = require("./routes/usuarios")
 const adminRoutes = require("./routes/admin")
-
-// Importar configuración de base de datos
-const { testConnection } = require("./config/database")
+const disponibilidadRoutes = require("./routes/disponibilidad")
+const historiaClinicaRoutes = require("./routes/historia-clinica")
+const recetasRoutes = require("./routes/recetas")
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -28,6 +29,9 @@ app.use("/api/auth", authRoutes)
 app.use("/api/citas", citasRoutes)
 app.use("/api/usuarios", usuariosRoutes)
 app.use("/api/admin", adminRoutes)
+app.use("/api/disponibilidad", disponibilidadRoutes)
+app.use("/api/historia-clinica", historiaClinicaRoutes)
+app.use("/api/recetas", recetasRoutes)
 
 // Ruta principal - servir el frontend
 app.get("/", (req, res) => {
@@ -45,7 +49,7 @@ app.use((err, req, res, next) => {
 })
 
 // Middleware para rutas no encontradas
-app.use("*", (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: "Ruta no encontrada",

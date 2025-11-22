@@ -1,92 +1,53 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { pool } = require("../config/database");
-const { verifyToken } = require("../middleware/auth");
+const express = require("express")
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
+const { pool } = require("../config/database")
+const { authenticateToken } = require("../middleware/auth")
 
-const router = express.Router();
+const router = express.Router()
 
-/**
- * Helper: normalizar email
- */
-function normalizeEmail(email) {
-  return String(email || "").trim().toLowerCase();
-}
-
-/**
- * Registro de usuario
- * - Permite roles: admin, recepcionista, medico, paciente.
- * - Opcionalmente restringe auto-registro de roles privilegiados con ALLOW_SELF_ADMIN_REG=false.
- */
+// Registro de usuario
 router.post("/register", async (req, res) => {
   try {
-    const { nombre, email, password, rol, especialidad, telefono } = req.body;
+    const { nombre, email, password, rol, especialidad, telefono } = req.body
 
+    // Validaciones básicas
     if (!nombre || !email || !password || !rol) {
       return res.status(400).json({
         success: false,
         message: "Todos los campos obligatorios deben ser completados",
-      });
+      })
     }
 
-    const emailNorm = normalizeEmail(email);
-
-    const ROLES_PERMITIDOS = ["admin", "recepcionista", "medico", "paciente"];
-    if (!ROLES_PERMITIDOS.includes(rol)) {
+    if (!["medico", "paciente"].includes(rol)) {
       return res.status(400).json({
         success: false,
-        message:
-          'Rol no válido. Debe ser "admin", "recepcionista", "medico" o "paciente"',
-      });
+        message: 'Rol no válido. Debe ser "medico" o "paciente"',
+      })
     }
 
-    // Bloqueo opcional de auto-registro de admin/recepcionista
-    const allowPrivilegedSelfReg =
-      String(process.env.ALLOW_SELF_ADMIN_REG || "false").toLowerCase() ===
-      "true";
-    if ((rol === "admin" || rol === "recepcionista") && !allowPrivilegedSelfReg) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Registro de roles privilegiados restringido. Use un endpoint protegido o habilite ALLOW_SELF_ADMIN_REG=true",
-      });
-    }
+    // Verificar si el email ya existe
+    const [existingUsers] = await pool.execute("SELECT id FROM usuarios WHERE email = ?", [email])
 
-    // Email único
-    const [existingUsers] = await pool.execute(
-      "SELECT id FROM usuarios WHERE email = ?",
-      [emailNorm]
-    );
     if (existingUsers.length > 0) {
-      return res.status(409).json({
+      return res.status(400).json({
         success: false,
         message: "El email ya está registrado",
-      });
+      })
     }
 
-    // Hash de contraseña
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // Encriptar contraseña
+    const saltRounds = 10
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
 
-    // Insertar usuario
+    // Insertar usuario en la base de datos
     const [result] = await pool.execute(
       "INSERT INTO usuarios (nombre, email, password, rol, especialidad, telefono) VALUES (?, ?, ?, ?, ?, ?)",
-      [nombre, emailNorm, hashedPassword, rol, especialidad || null, telefono || null]
-    );
+      [nombre, email, hashedPassword, rol, especialidad || null, telefono || null],
+    )
 
-    // JWT
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "Configuración inválida: falta JWT_SECRET",
-      });
-    }
-
-    const token = jwt.sign(
-      { userId: result.insertId, email: emailNorm, rol },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
-    );
+    // Generar token JWT
+    const token = jwt.sign({ userId: result.insertId, email, rol }, process.env.JWT_SECRET, { expiresIn: "24h" })
 
     res.status(201).json({
       success: true,
@@ -95,78 +56,65 @@ router.post("/register", async (req, res) => {
         user: {
           id: result.insertId,
           nombre,
-          email: emailNorm,
+          email,
           rol,
           especialidad: especialidad || null,
-          telefono: telefono || null,
         },
         token,
       },
-    });
+    })
   } catch (error) {
-    console.error("Error en registro:", error);
-    res.status(500).json({ success: false, message: "Error interno del servidor" });
+    console.error("Error en registro:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    })
   }
-});
+})
 
-/**
- * Login
- */
+// Inicio de sesión
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body
 
-    const emailNorm = normalizeEmail(email);
+    // Validaciones básicas
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email y contraseña son requeridos",
+      })
+    }
+
+    // Buscar usuario por email
     const [users] = await pool.execute(
-      "SELECT id, nombre, email, password, rol, especialidad, telefono FROM usuarios WHERE email = ?",
-      [emailNorm]
-    );
+      "SELECT id, nombre, email, password, rol, especialidad FROM usuarios WHERE email = ?",
+      [email],
+    )
 
     if (users.length === 0) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Credenciales inválidas" });
-    }
-
-    const user = users[0];
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Credenciales inválidas" });
-    }
-
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
+      return res.status(401).json({
         success: false,
-        message: "Configuración inválida: falta JWT_SECRET",
-      });
+        message: "Credenciales inválidas",
+      })
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, rol: user.rol },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
-    );
+    const user = users[0]
 
-     // Rol: no httpOnly para que el cliente pueda leerlo si es necesario (ej. para layout)
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+    // Verificar contraseña
+    const isPasswordValid = await bcrypt.compare(password, user.password)
 
-    res.cookie("rol", user.rol, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Credenciales inválidas",
+      })
+    }
 
-    // Respuesta JSON igual que antes (para compatibilidad con frontend)
+    // Generar token JWT
+    const token = jwt.sign({ userId: user.id, email: user.email, rol: user.rol }, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    })
+
     res.json({
       success: true,
       message: "Inicio de sesión exitoso",
@@ -177,32 +125,36 @@ router.post("/login", async (req, res) => {
           email: user.email,
           rol: user.rol,
           especialidad: user.especialidad,
-          telefono: user.telefono,
         },
         token,
       },
-    });
-
+    })
   } catch (error) {
-    console.error("Error en login:", error);
-    res.status(500).json({ success: false, message: "Error interno del servidor" });
+    console.error("Error en login:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    })
   }
-});
+})
 
-/**
- * Verificar token
- */
-router.get("/verify", verifyToken, async (req, res) => {
-  try {
-    res.json({
-      success: true,
-      message: "Token válido",
-      data: { user: req.user },
-    });
-  } catch (error) {
-    console.error("Error verificando token:", error);
-    res.status(500).json({ success: false, message: "Error interno del servidor" });
-  }
-});
+// Verificar token (para mantener sesión)
+router.get("/verify", authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    message: "Token válido",
+    data: {
+      user: req.user,
+    },
+  })
+})
 
-module.exports = router;
+// Cerrar sesión (opcional - el frontend puede simplemente eliminar el token)
+router.post("/logout", authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    message: "Sesión cerrada exitosamente",
+  })
+})
+
+module.exports = router
